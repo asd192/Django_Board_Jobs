@@ -1,0 +1,60 @@
+{% extends 'vacancy/base.html' %}
+{% load my_filters %}
+
+{% block title %}Вакансии компании {{ company }}{% endblock title %}
+
+{% block container %}
+
+    <main class="container mt-3">
+        <div class="navbar mt-5">
+            <p><a onclick="javascript:history.back(); return false;">Назад</a></p>
+        </div>
+        <section>
+            <div class="h1-logo">
+                <div>
+                    <h1 class="h1 mx-auto mt-0 pt-1" style="font-size: 60px;">
+                        <strong>{{ company.name|title }}</strong></h1>
+                </div>
+                <div class="company_logo">
+                    <img src="{{ company.logo.url }}" width="200" height="110"
+                         alt="Логотип компании {{ company.name|title }}">
+                </div>
+            </div>
+            <p class="text-center pt-1 font-italic">
+                Компания, {{ company.location }}, {{ vacancies|length|ru_pluralize:'вакансия, вакансии, вакансий' }}</p>
+            <p class="cmpn_ttl text-center pt-1">{{ company.description }}</p>
+
+            <div class="row mt-5">
+                <div class="col-12 col-lg-8 offset-lg-2 m-auto">
+
+                    {% for vacancy in vacancies %}
+
+                        <div class="card mb-4">
+                            <div class="card-body px-4">
+                                <div class="row">
+                                    <div class="col-12 col-md-8 col-lg-9">
+                                        <h2 class="h2-name h2 pb-2"><a
+                                                href="{% url 'vacancy' vacancy.id %}">{{ vacancy.title }}</a>
+                                        </h2>
+                                        <p class="mb-2">
+                                        <ul class="ul_skills">{{ vacancy.skills|list_li|safe|escape }}</ul></p>
+                                        <p>{{ vacancy.description|truncatechars:150|striptags }}</p>
+                                        <p>От {{ vacancy.salary_min }} до {{ vacancy.salary_max }} руб.</p>
+                                        <p class="text-muted pt-1">{{ vacancy.published_at|date:"d E" }}</p>
+                                    </div>
+                                    <div class="col-12 col-md-4 col-lg-3 d-flex align-items-end">
+                                        <img src="{{ company.logo.url }}" width="130"
+                                             height="80" alt="Логотип компании {{ company.name|title }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+{% endblock %}

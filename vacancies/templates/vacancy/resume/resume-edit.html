@@ -1,0 +1,23 @@
+{% extends 'vacancy/base.html' %}
+
+{% block title %}Вакансии компании {{ data.company_info }}{% endblock title %}
+
+{% block container %}
+
+    <main class="container mt-3 pb-5">
+        <section class="col-12 col-lg-6 offset-lg-3 mt-5 card">
+            <div class="card-body px-3 pb-4">
+                <h1 class="h4 pt-2 pb-3">Мое резюме</h1>
+
+                {% if message == 'success' %}
+                    <p class="alert alert-info" role="alert">Резюме обновлено</p>
+                {% endif %}
+
+                {% load crispy_forms_tags %}
+                {% crispy form "bootstrap4" %}
+
+            </div>
+        </section>
+    </main>
+
+{% endblock %}

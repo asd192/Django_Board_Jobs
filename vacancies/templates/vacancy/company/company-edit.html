@@ -1,0 +1,37 @@
+{% extends 'vacancy/base.html' %}
+
+
+{% block title %}Вакансии компании {{ data.company_info }}{% endblock title %}
+
+{% block container %}
+
+    <main class="container mt-3 pb-5">
+        <div class="row mt-5">
+
+            {% include 'vacancy/company/menu_left.html' %}
+
+            <div class="col-12 col-lg-8">
+                <div class="card">
+                    <div class="card-body px-4 pb-4">
+                        <!-- Tab -->
+                        <section class="tab-pane fade show active">
+                                <h2 class="h4 pt-2 pb-3">Информация о&nbsp;вашей компании</h2>
+
+                            {% if message == 'success' %}
+                            <p class="alert alert-info" role="alert">
+                                Информация о компании обновлена
+                            </p>
+                            {% endif %}
+
+                            {% load crispy_forms_tags %}
+                            {% crispy form "bootstrap4" %}
+
+                        </section>
+                        <!-- END Tab -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+{% endblock %}

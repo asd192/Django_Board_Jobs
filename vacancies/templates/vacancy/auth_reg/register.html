@@ -1,0 +1,22 @@
+{% extends 'vacancy/base.html' %}
+
+{% block title %}Регистрация{% endblock title %}
+
+{% block container %}
+
+
+
+    <main class="container mt-3">
+    <h1 class="h1 text-center py-4"><strong>Регистрация</strong></h1>
+        <div class="row">
+            <div class="col-6 offset-md-3">
+
+                {% load crispy_forms_tags %}
+                {% crispy form "bootstrap4" %}
+
+                <div class="mt-4 text-center"><p>Есть аккаунт? <a href="/login">Войдите!</a></p></div>
+            </div>
+        </div>
+    </main>
+
+{% endblock %}

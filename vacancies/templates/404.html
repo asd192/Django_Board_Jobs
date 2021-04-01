@@ -1,0 +1,25 @@
+{% extends 'vacancy/base.html' %}
+
+{% block container %}
+
+    <div class="text-center mx-auto">
+        <h1 class="h1 mt-4 py-5">Не могу найти такую страницу</h1>
+
+        <div class="mx-auto sk-chase">
+            <div class="sk-chase-dot sk-404"></div>
+            <div class="sk-chase-dot sk-404"></div>
+            <div class="sk-chase-dot sk-404"></div>
+            <div class="sk-chase-dot sk-404"></div>
+            <div class="sk-chase-dot sk-404"></div>
+            <div class="sk-chase-dot sk-404"></div>
+        </div>
+
+        <p class="mt-5">Ждать и надеяться — верный способ скоропостижно рехнуться.</p>
+
+        <div>
+            <a href="{% url 'main' %}" class="text-success">Перейти на главную</a> |
+            <a href="{% url 'vacancies_list' %}" class="text-success">Все вакансии</a>
+        </div>
+
+    </div>
+{% endblock %}

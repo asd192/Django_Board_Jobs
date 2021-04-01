@@ -1,0 +1,64 @@
+{% extends 'vacancy/base.html' %}
+{% load my_filters %}
+
+{% block title %}Вакансия компании {{ company.name|title }}{% endblock title %}
+
+{% block container %}
+
+    <main class="container mt-3 pb-5">
+        <div class="row mt-5">
+            <div class="col-12 col-lg-2">
+                <div class="pl-3 mb-5">
+                    <p><a onclick="javascript:history.back(); return false;" class="text-success">Назад</a></p>
+                </div>
+            </div>
+            <div class="col-12 col-lg-8">
+                <section class="pl-3">
+
+                    {% if application_sent %}
+                        <p class="alert alert-success" role="alert">
+                            Вы уже отзывались на эту вакансию. Хотите
+                            <a href="#form_application" class="text-success">обновить</a>?
+
+                        </p>
+                    {% endif %}
+
+                    <div class="vacancy_logo_company">
+                        <a href="{% url 'company' vacancy.company_id %}"><img
+                                src="{{ company.logo.url }}"
+                                width="130" height="80"
+                                alt="Логотип компании разместившей вакансию"></a>
+                    </div>
+                    <div class="d-flex align-items-baseline align-content-baseline">
+                        <h1 class="h2 mt-4 font-weight-bold">{{ vacancy.title }}</h1>
+                        <p class="salary m-0 pl-3">{{ vacancy.salary_min }} – {{ vacancy.salary_max }} Р</p>
+                    </div>
+                    <p class="mt-2">{{ skills }}</p>
+                    <p class="text-muted mb-4">{{ company.name|title }}
+                        ({{ company.employee_count|ru_pluralize:'человек, человека, человек' }}),
+                        {{ company.location }} или удаленно</p>
+                    <div style="line-height: 1.8;">
+                        {% autoescape off %}
+                            {{ vacancy.description }}
+                        {% endautoescape %}
+                    </div>
+                    <hr>
+                    {% if request.user.is_authenticated %}
+                        <div id="form_application" class="card-body mx-3">
+                            <p class="h5 mt-3 font-weight-normal">Отозваться на вакансию</p>
+
+                            {% load crispy_forms_tags %}
+                            {% crispy form "bootstrap4" %}
+
+                        </div>
+                    {% else %}
+                        <p class="mt-3 font-weight-normal text-center">Чтобы отозваться на вакансию необходимо <a
+                                href="{% url 'login' %}" class="text-info">Войти</a></p>
+                    {% endif %}
+
+                </section>
+            </div>
+        </div>
+    </main>
+
+{% endblock %}
