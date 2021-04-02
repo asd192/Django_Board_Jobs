@@ -3,6 +3,8 @@ from crispy_forms.layout import Column, HTML, Layout, Row, Submit
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UsernameField, AuthenticationForm
 from django.contrib.auth.models import User
+from phonenumber_field.modelfields import PhoneNumberField
+
 
 from vacancies.models import Application, Company, Vacancy, Resume
 
@@ -151,7 +153,10 @@ class ApplicationForm(forms.ModelForm):
 
     class Meta:
         model = Application
-        fields = ("written_username", "written_phone", "written_cover_letter", "written_photo")
+        fields = ('written_username', 'written_phone', 'written_cover_letter', 'written_photo')
+        error_messages = {
+            'written_phone': {'invalid': 'Введите корректный номер телефона. Пример: +7 999 887 33 22'}
+        }
 
 
 class ResumeForm(forms.ModelForm):

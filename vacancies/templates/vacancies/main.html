@@ -1,4 +1,4 @@
-{% extends 'vacancy/base.html' %}
+{% extends 'vacancies/base.html' %}
 
 {% load static %}
 
@@ -47,9 +47,9 @@
                             </a>
                             <div class="card-body">
                                 <p class="card-text mb-2">{{ specialty.title }}</p>
-                                <p class="card-text "><a
+                                <p class="card-text"><a
                                         href="{% url 'vacancies_specialization' specialty.code%}"
-                                        class="text-success">{{ specialty.count|ru_pluralize:'вакансия, вакансии, вакансий' }}</a>
+                                        class="text-success">{{ specialties.count|ru_pluralize:'вакансия, вакансии, вакансий' }}</a>
                                 </p>
                             </div>
                         </div>

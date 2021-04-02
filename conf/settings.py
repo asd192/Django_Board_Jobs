@@ -38,10 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'vacancies'
 ]
 
 INSTALLED_APPS += [
+    'vacancies',
     'crispy_forms',
     'phonenumber_field',
     'debug_toolbar',

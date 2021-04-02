@@ -1,4 +1,3 @@
-import re
 from typing import Union
 
 from django import template
@@ -9,6 +8,7 @@ register = template.Library()
 @register.filter()
 def ru_pluralize(number: Union[int, str], arg: str = 'текст, тексты, текстов'):
     nominative_singular, nominative_plural, genitive_plural = arg.split(', ')
+
     number = abs(int(number))
 
     if (number % 10) == 1 and number % 100 != 11:

@@ -1,4 +1,5 @@
-{% extends 'vacancy/base.html' %}
+{% extends 'vacancies/base.html' %}
+
 {% load my_filters %}
 
 {% block title %}{{ titles }}{% endblock title %}
@@ -15,11 +16,13 @@
                 <div class="col-12 col-lg-8 offset-lg-2 m-auto">
 
                     {% for vacancy in vacancies %}
+
                         <div class="card mb-4">
                             <div class="card-body px-4">
                                 <div class="row">
                                     <div class="col-12 col-md-8 col-lg-9">
-                                        <h2 class="h2-name h2 pb-2"><a href="{% url 'vacancy' vacancy.id %}">{{ vacancy.title }}</a></h2>
+                                        <h2 class="h2-name h2 pb-2"><a
+                                                href="{% url 'vacancy' vacancy.id %}">{{ vacancy.title }}</a></h2>
                                         <ul class="ul_skills">{{ vacancy.skills|list_li|safe|escape }}</ul>
                                         <p>{{ vacancy.description|truncatechars:150|striptags }}</p>
                                         <p>От {{ vacancy.salary_min }} до {{ vacancy.salary_max }} руб.</p>
@@ -27,9 +30,9 @@
                                     </div>
                                     <div class="col-12 col-md-4 col-lg-3 d-flex align-items-end">
                                         <a href="{% url 'company' vacancy.company_id %}"><img
-                                                src="/media/{{ vacancy.company__logo }}" width="130"
+                                                src="/media/{{ vacancy.company.logo }}" width="130"
                                                 height="80"
-                                                alt="Логотип компании {{ vacancy.company__name }}"></a>
+                                                alt="Логотип компании {{ vacancy.company.name }}"></a>
                                     </div>
                                 </div>
                             </div>
@@ -37,9 +40,35 @@
 
                     {% endfor %}
 
+                    <!-- Pagination -->
+                    <div class="container">
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                {% if page_obj.has_previous %}
+                                    <div class="col-sm-4">
+                                        <span><a href="?page={{ page_obj.previous_page_number }}">Назад</a></span>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-sm-4">
+                                <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.</span>
+                            </div>
+
+                            <div class="col-sm-4">
+                                {% if page_obj.has_next %}
+                                    <div class="col-sm-4">
+                                        <span><a href="?page={{ page_obj.next_page_number }}">Вперед</a></span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
+
 
 {% endblock %}

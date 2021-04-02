@@ -6,11 +6,16 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.views.generic import CreateView
+from django.views.generic.list import ListView
+from django.views.generic import DetailView, TemplateView
+
+from django.core.paginator import Paginator
+from django.core.paginator import EmptyPage
+from django.core.paginator import PageNotAnInteger
 
 from conf.settings import MEDIA_COMPANY_IMAGE_DIR
 from vacancies.forms import MyRegistrationForm, MyLoginForm
 from vacancies.forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
-
 from vacancies.models import Application, Company, Specialty, Resume, Vacancy
 
 
@@ -20,31 +25,52 @@ from vacancies.models import Application, Company, Specialty, Resume, Vacancy
 class Registration(CreateView):
     form_class = MyRegistrationForm
     success_url = '/login'
-    template_name = 'vacancy/auth_reg/register.html'
+    template_name = 'vacancies/auth_reg/register.html'
 
 
 class Login(LoginView):
     form_class = MyLoginForm
     redirect_authenticated_user = True
-    template_name = 'vacancy/auth_reg/login.html'
+    template_name = 'vacancies/auth_reg/login.html'
 
 
-def main_view(request):
-    # главная страница
-    specialties = Specialty.objects.values('code', 'title', 'picture').annotate(count=Count('vacancies__specialty_id'))
-    companies = Company.objects.values('id', 'logo', 'name').annotate(count=Count('vacancies__specialty_id'))
+class MainView(TemplateView):
+    template_name = 'vacancies/main.html'
 
-    return render(request, 'vacancy/main.html', {'specialties': specialties[:8], 'companies': companies[:8]})
+    def get_context_data(self, **kwargs):
+        context = super(MainView, self).get_context_data(**kwargs)
+        context['specialties'] = Specialty.objects.annotate(count=Count('vacancies'))[:8]
+        context['companies'] = Company.objects.annotate(count=Count('vacancies'))[:8]
+        return context
 
 
-def vacancy_list_view(request):
-    # все вакансии списком
-    vacancies = Vacancy.objects.values(
-        'id', 'title', 'skills', 'salary_min', 'salary_max', 'published_at', 'company_id', 'company__name',
-        'company__logo',
-    )
+class Vacancies(ListView):
+    template_name = 'vacancies/vacancies.html'
 
-    return render(request, 'vacancy/vacancies.html', {'vacancies': vacancies})
+    model = Vacancy
+    context_object_name = 'vacancies'
+    paginate_by = 3
+
+    def get_context_data(self, **kwargs):
+        context = super(Vacancies, self).get_context_data(**kwargs)
+        vacancies_list = Vacancy.objects.select_related('company').all()
+        context['vacancies'] = vacancies_list
+
+        # пагинация
+        paginator = Paginator(vacancies_list, self.paginate_by)
+        page = self.request.GET.get('page')
+        try:
+            vacancy_group = paginator.page(page)
+        except PageNotAnInteger:
+            vacancy_group = paginator.page(1)
+        except EmptyPage:
+            vacancy_group = paginator.page(paginator.num_pages)
+        context['list_exams'] = vacancy_group
+
+        return context
+
+    # def get_queryset(self):
+    #     return Vacancy.objects.select_related('company').all()
 
 
 def vacancies_specialization_view(request, specialization: str):
@@ -59,7 +85,7 @@ def vacancies_specialization_view(request, specialization: str):
     else:
         specialization_title = get_object_or_404(Specialty, code=specialization).title
 
-    return render(request, 'vacancy/vacancies.html', {'vacancies': vacancies, 'title': specialization_title})
+    return render(request, 'vacancies/vacancies.html', {'vacancies': vacancies, 'title': specialization_title})
 
 
 def company_card_view(request, company_id: int):
@@ -70,7 +96,7 @@ def company_card_view(request, company_id: int):
         'id', 'title', 'skills', 'salary_min', 'salary_max', 'published_at', 'company__logo', 'company__name',
     )
 
-    return render(request, 'vacancy/company/company.html', {'vacancies': vacancies, 'company': company})
+    return render(request, 'vacancies/company/company.html', {'vacancies': vacancies, 'company': company})
 
 
 def vacancy_view(request, vacancy_id: int):
@@ -118,16 +144,17 @@ def vacancy_view(request, vacancy_id: int):
         'application_sent': application_sent,
     }
 
-    return render(request, 'vacancy/vacancy.html', context=context)
+    return render(request, 'vacancies/vacancy.html', context=context)
 
 
 def resume_sending_view(request, vacancy_id):
     # отправка отклика на вакансию
-    return render(request, 'vacancy/sent.html', {'vacancy_id': vacancy_id})
+    return render(request, 'vacancies/sent.html', {'vacancy_id': vacancy_id})
 
 
 def search_view(request, query: str):
     pass
+
 
 #################################################
 #                   Компания                    #
@@ -139,7 +166,7 @@ def my_company_letsstart_view(request):
     if company_exists:
         return redirect(my_company_view)
 
-    return render(request, 'vacancy/company/company-create.html')
+    return render(request, 'vacancies/company/company-create.html')
 
 
 def my_company_empty_view(request):
@@ -162,7 +189,7 @@ def my_company_empty_view(request):
             company_form.save()
             message = 'success'
 
-    return render(request, 'vacancy/company/company-edit.html', {'form': company_form, 'message': message})
+    return render(request, 'vacancies/company/company-edit.html', {'form': company_form, 'message': message})
 
 
 def my_company_view(request):
@@ -189,7 +216,7 @@ def my_company_view(request):
             Company.objects.filter(owner_id=request.user.id).update(**company_data)
             message = 'success'
 
-    return render(request, 'vacancy/company/company-edit.html', {'form': company_form, 'message': message})
+    return render(request, 'vacancies/company/company-edit.html', {'form': company_form, 'message': message})
 
 
 def my_vacancies_list_view(request):
@@ -205,7 +232,7 @@ def my_vacancies_list_view(request):
 
     vacancies = Vacancy.objects.filter(company_id=company)
 
-    return render(request, 'vacancy/company/vacancy-list.html', {'vacancies': vacancies})
+    return render(request, 'vacancies/company/vacancy-list.html', {'vacancies': vacancies})
 
 
 def my_vacancy_empty_view(request):
@@ -219,7 +246,7 @@ def my_vacancy_empty_view(request):
             vacancy_empty_form.save()
             message = 'success'
 
-    return render(request, 'vacancy/company/vacancy-edit.html', {'form': vacancy_empty_form, 'message': message})
+    return render(request, 'vacancies/company/vacancy-edit.html', {'form': vacancy_empty_form, 'message': message})
 
 
 def my_vacancy_view(request, vacancy_id: int):
@@ -244,7 +271,7 @@ def my_vacancy_view(request, vacancy_id: int):
         'applications': applications,
     }
 
-    return render(request, 'vacancy/company/vacancy-edit.html', context=context)
+    return render(request, 'vacancies/company/vacancy-edit.html', context=context)
 
 
 #################################################
@@ -252,7 +279,7 @@ def my_vacancy_view(request, vacancy_id: int):
 #################################################
 def my_resume_letsstart_view(request):
     # предложение создать резюме
-    return render(request, 'vacancy/resume/resume-create.html')
+    return render(request, 'vacancies/resume/resume-create.html')
 
 
 def my_resume_empty_view(request):
@@ -275,7 +302,7 @@ def my_resume_empty_view(request):
             resume_form.save()
             message = 'success'
 
-    return render(request, 'vacancy/resume/resume-edit.html', {'form': resume_form, 'message': message})
+    return render(request, 'vacancies/resume/resume-edit.html', {'form': resume_form, 'message': message})
 
 
 def my_resume_view(request):
@@ -299,7 +326,7 @@ def my_resume_view(request):
             Resume.objects.filter(user_id=request.user.id).update(**resume_data)
             message = 'success'
 
-    return render(request, 'vacancy/resume/resume-edit.html', {'form': resume_form, 'message': message})
+    return render(request, 'vacancies/resume/resume-edit.html', {'form': resume_form, 'message': message})
 
 
 def custom_handler404(request, exception):

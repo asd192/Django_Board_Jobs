@@ -21,7 +21,7 @@ from django.contrib.auth.views import LogoutView
 from django.urls import include, path
 
 from vacancies.views import Login, Registration
-from vacancies.views import company_card_view, main_view, vacancy_view, vacancy_list_view
+from vacancies.views import company_card_view, MainView, vacancy_view, Vacancies
 from vacancies.views import custom_handler404, custom_handler500
 from vacancies.views import my_company_empty_view, my_company_view, my_company_letsstart_view
 from vacancies.views import my_resume_empty_view, my_resume_view, my_resume_letsstart_view
@@ -34,8 +34,8 @@ handler500 = custom_handler500
 
 urlpatterns = [
     # основные
-    path('', main_view, name='main'),
-    path('vacancies', vacancy_list_view, name='vacancies_list'),  # все вакансии
+    path('', MainView.as_view(), name='main'),
+    path('vacancies', Vacancies.as_view(), name='vacancies'),  # все вакансии
     path('vacancies/<int:vacancy_id>', vacancy_view, name='vacancy'),  # одна вакансия
     path('vacancies/cat/<str:specialization>', vacancies_specialization_view, name='vacancies_specialization'),
     path('companies/<int:company_id>', company_card_view, name='company'),  # компания

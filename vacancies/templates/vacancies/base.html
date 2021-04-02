@@ -6,7 +6,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>{% block title_head %}{% endblock title_head %} | Джуманджи</title>
+    <title>{% block title_head %}{% endblock title_head %}</title>
     <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -32,6 +32,7 @@
             <ul class="navbar-nav col-2 justify-content-end">
 
                 {% if request.user.is_authenticated %}
+
                     <ul class="navbar-nav col-2 justify-content-end">
                         <li class="nav-item active">
                             <div class="btn-group">
@@ -49,7 +50,9 @@
                             </div>
                         </li>
                     </ul>
+
                 {% else %}
+
                     <li class="nav-item">
                         <a href="{% url 'login' %}" class="nav-link font-weight-bold">Вход</a>
                     </li>
