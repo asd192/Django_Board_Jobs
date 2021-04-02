@@ -9,9 +9,9 @@
     <main class="container mt-3">
         <section>
             <h1 class="h1 text-center mx-auto mt-4 pt-5" style="font-size: 70px;"><strong>
-                {% if request.path == '/vacancies' %}Все вакансии{% else %}{{ title }}{% endif %}</strong>
+                {% if request.path == '/vacancies' %}Все вакансии{% else %}{{ specialty }}{% endif %}</strong>
             </h1>
-            <p class="text-center pt-1">Найдено {{ vacancies|length|ru_pluralize:'вакансия, вакансии, вакансий' }}</p>
+            <p class="text-center pt-1">Найдено {{ vacancies_count|ru_pluralize:'вакансия, вакансии, вакансий' }}</p>
             <div class="row mt-5">
                 <div class="col-12 col-lg-8 offset-lg-2 m-auto">
 
@@ -41,30 +41,31 @@
                     {% endfor %}
 
                     <!-- Pagination -->
-                    <div class="container">
-                        <div class="row">
+                    {% if is_paginated %}
 
-                            <div class="col-sm-4">
-                                {% if page_obj.has_previous %}
-                                    <div class="col-sm-4">
+                        <div class="container">
+                            <div class="row">
+
+                                <div class="col-sm-4 text-right">
+                                    {% if page_obj.has_previous %}
                                         <span><a href="?page={{ page_obj.previous_page_number }}">Назад</a></span>
-                                    </div>
-                                {% endif %}
-                            </div>
+                                    {% endif %}
+                                </div>
 
-                            <div class="col-sm-4">
-                                <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.</span>
-                            </div>
+                                <div class="col-sm-4 text-center">
+                                    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                                </div>
 
-                            <div class="col-sm-4">
-                                {% if page_obj.has_next %}
-                                    <div class="col-sm-4">
+                                <div class="col-sm-4">
+                                    {% if page_obj.has_next %}
                                         <span><a href="?page={{ page_obj.next_page_number }}">Вперед</a></span>
-                                    </div>
-                                {% endif %}
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-                    </div>
+
+                    {% endif %}
+
                 </div>
             </div>
         </section>

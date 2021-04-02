@@ -60,6 +60,7 @@ class Vacancy(models.Model):
     class Meta:
         verbose_name = "вакансия"
         verbose_name_plural = "вакансии"
+        ordering = ['id']
 
     def __str__(self):
         return f"{self.title}"
