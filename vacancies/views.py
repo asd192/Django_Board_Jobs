@@ -5,7 +5,9 @@ from django.http import Http404, HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.generic import CreateView
+from django.views.generic.edit import FormMixin
 from django.views.generic.list import ListView
 from django.views.generic import DetailView, TemplateView
 
@@ -87,52 +89,102 @@ class CompanyCardView(VacanciesView):
         return context
 
 
-def vacancy_view(request, vacancy_id: int):
-    # страница вакансии
-    try:
-        vacancy = Vacancy.objects.select_related('company').get(id=vacancy_id)
-        company = vacancy.company
-    except (Vacancy.DoesNotExist, Company.DoesNotExist):
-        raise Http404
+class VacancyView(FormMixin, DetailView):
+    template_name = 'vacancies/vacancy.html'
 
-    application_sent = False
-    user_in_application = Application.objects.filter(vacancy_id=vacancy_id).filter(user_id=request.user.id)
+    model = Vacancy
+    context_object_name = 'vacancy'
+    form_class = ApplicationForm
 
-    if user_in_application:
-        # если юзер уже отзывался на эту вакансию
-        application_sent = True
-        vacancy_send_form = ApplicationForm(instance=user_in_application.first())
-        if request.method == 'POST':
-            vacancy_send_form = ApplicationForm(request.POST, request.FILES)
-            if vacancy_send_form.is_valid():
-                vacancy_data = vacancy_send_form.cleaned_data
-                user_in_application.update(**vacancy_data)
+    def get_success_url(self):
+        return reverse('vacancy', kwargs={'pk': self.object.pk})
 
-                return redirect(resume_sending_view, vacancy_id=vacancy.id)
-    else:
-        # пустая форма отклика
-        vacancy_send_form = ApplicationForm()
-        if request.method == 'POST':
-            vacancy_send_form = ApplicationForm(request.POST)
-            if vacancy_send_form.is_valid():
-                vacancy_send_form_data = vacancy_send_form.cleaned_data
-                vacancy_send_form_data['user_id'] = request.user.id
-                vacancy_send_form_data['vacancy_id'] = vacancy.id
-                Application(**vacancy_send_form_data).save()
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid_create(form)
+        else:
+            return self.form_invalid(form)
 
-                return redirect(resume_sending_view, vacancy_id=vacancy.id)
+    def form_valid_create(self, form):
+        fields = form.save(commit=False)
+        fields.user_id = self.request.user.id
+        fields.vacancy_id = self.object.pk
+        form.save()
+        return super().form_valid(form)
 
-            # elif 'written_phone' not in vacancy_send_form.cleaned_data:
-            #     vacancy_send_form.add_error('written_phone', 'Еще примеры: +7 999 555 33 11')
+    def get_context_data(self, **kwargs):
+        context = super(VacancyView, self).get_context_data(**kwargs)
+        if Application.objects.filter(vacancy_id=self.object.pk).filter(user_id=self.request.user.id):
+            context['application_sent'] = True
+        return context
 
-    context = {
-        'form': vacancy_send_form,
-        'vacancy': vacancy,
-        'company': company,
-        'application_sent': application_sent,
-    }
+    # def form_valid(self, form):
+    #     fields = form.save(commit=False)
+    #     fields.user_id = self.request.user.id
+    #     fields.vacacy_id = self.object
+    #     fields.save()
+    #     return super().form_valid(form)
 
-    return render(request, 'vacancies/vacancy.html', context=context)
+    # def get_success_url(self):
+    #     return reverse('vacancy', kwargs={'pk': self.object.pk})
+
+    # def post(self, request, *args, **kwargs):
+    #     self.object = self.get_object()
+    #     form = self.get_form()
+    #
+    #     if form.is_valid():
+    #         return super(VacancyView, self).form_valid(form)
+    #     else:
+    #         return self.form_invalid(form)
+
+
+
+# def vacancy_view(request, vacancy_id: int):
+#     # страница вакансии
+#     try:
+#         vacancy = Vacancy.objects.select_related('company').get(id=vacancy_id)
+#         company = vacancy.company
+#     except (Vacancy.DoesNotExist, Company.DoesNotExist):
+#         raise Http404
+#
+#     application_sent = False
+#     user_in_application = Application.objects.filter(vacancy_id=vacancy_id).filter(user_id=request.user.id)
+#
+#     if user_in_application:
+#         # если юзер уже отзывался на эту вакансию
+#         application_sent = True
+#         vacancy_send_form = ApplicationForm(instance=user_in_application.first())
+#         if request.method == 'POST':
+#             vacancy_send_form = ApplicationForm(request.POST, request.FILES)
+#             if vacancy_send_form.is_valid():
+#                 vacancy_data = vacancy_send_form.cleaned_data
+#                 user_in_application.update(**vacancy_data)
+#
+#                 return redirect(resume_sending_view, vacancy_id=vacancy.id)
+#     else:
+#         # пустая форма отклика
+#         vacancy_send_form = ApplicationForm()
+#         if request.method == 'POST':
+#             vacancy_send_form = ApplicationForm(request.POST)
+#             if vacancy_send_form.is_valid():
+#                 vacancy_send_form_data = vacancy_send_form.cleaned_data
+#                 vacancy_send_form_data['user_id'] = request.user.id
+#                 vacancy_send_form_data['vacancy_id'] = vacancy.id
+#                 Application(**vacancy_send_form_data).save()
+#
+#                 return redirect(resume_sending_view, vacancy_id=vacancy.id)
+#
+#
+#     context = {
+#         'form': vacancy_send_form,
+#         'vacancy': vacancy,
+#         'company': company,
+#         'application_sent': application_sent,
+#     }
+#
+#     return render(request, 'vacancies/vacancy.html', context=context)
 
 
 def resume_sending_view(request, vacancy_id):
