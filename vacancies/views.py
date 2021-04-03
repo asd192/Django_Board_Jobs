@@ -103,15 +103,19 @@ class VacancyView(FormMixin, DetailView):
         self.object = self.get_object()
         form = self.get_form()
         if form.is_valid():
-            return self.form_valid_create(form)
-        else:
-            return self.form_invalid(form)
+                return self.form_valid(form)
+        # else:
+        #     return self.form_invalid(form)
 
-    def form_valid_create(self, form):
+    def form_valid(self, form):
         fields = form.save(commit=False)
         fields.user_id = self.request.user.id
         fields.vacancy_id = self.object.pk
-        form.save()
+        if Application.objects.filter(vacancy_id=self.object.pk).filter(user_id=self.request.user.id):
+            fields = form.cleaned_data
+            Application.objects.filter(vacancy_id=self.object.pk).filter(user_id=self.request.user.id).update(**fields)
+        else:
+            form.save()
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
