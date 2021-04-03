@@ -198,3 +198,12 @@ a:not([href]):not([tabindex]):active {
     position: absolute;
     right: 20px;
 }
+
+.page-link {
+    color: #28a745;
+}
+
+.page-item.active .page-link {
+    background-color: #28a745;
+    border-color: #28a745;
+}

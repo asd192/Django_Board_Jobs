@@ -20,7 +20,7 @@
 
                         <p class="alert alert-success" role="alert">
                             Вы уже отзывались на эту вакансию. Хотите
-                            <a href="#form_application" class="text-success">обновить</a>?
+                            <a href="#form_application" class="text-success">отправить ещё</a>?
                         </p>
 
                     {% endif %}
@@ -33,12 +33,13 @@
                     </div>
                     <div class="d-flex align-items-baseline align-content-baseline">
                         <h1 class="h2 mt-4 font-weight-bold">{{ vacancy.title }}</h1>
-                        <p class="salary m-0 pl-3">{{ vacancy.salary_min }} – {{ vacancy.salary_max }} Р</p>
+                        <p class="salary m-0 pl-3 font-italic">{{ vacancy.salary_min }} – {{ vacancy.salary_max }} Р</p>
                     </div>
-                    <p class="mt-2">{{ skills }}</p>
+                    <p class="mt-2">
+                        <ul class="ul_skills">{{ vacancy.skills|list_li|safe|escape }}</ul></p>
                     <p class="text-muted mb-4">{{ company.name|title }}
-                        ({{ 0|ru_pluralize:'человек, человека, человек' }}),
-                        {{ company.location }} или удаленно</p>
+                        ({{ vacancy.company.employee_count|ru_pluralize:'человек, человека, человек' }}),
+                        {{ vacancy.company.location }} или удалённо</p>
                     <div style="line-height: 1.8;">
 
                         {% autoescape off %}{{ vacancy.description }}{% endautoescape %}

@@ -27,7 +27,7 @@ from vacancies.views import my_company_empty_view, my_company_view, my_company_l
 from vacancies.views import my_resume_empty_view, my_resume_view, my_resume_letsstart_view
 from vacancies.views import my_vacancy_empty_view, my_vacancy_view, my_vacancies_list_view
 from vacancies.views import VacanciesSpecialtyView, resume_sending_view
-from vacancies.views import search_view
+from vacancies.views import SearchView
 
 handler404 = custom_handler404
 handler500 = custom_handler500
@@ -40,7 +40,7 @@ urlpatterns = [
     path('vacancies/cat/<str:specialty>', VacanciesSpecialtyView.as_view(), name='vacancies_specialty'),
     path('companies/<int:company_id>', CompanyCardView.as_view(), name='company'),  # компания
     path('vacancies/<int:vacancy_id>/send/', resume_sending_view, name='resume_send'),  # отправка заявки
-    path('search?s=<query>', search_view, name='search'),
+    path('search', SearchView.as_view(), name='search'),
 
     # компания
     path('mycompany/letsstart/', my_company_letsstart_view, name='my_company_letsstart'),  # создать компанию

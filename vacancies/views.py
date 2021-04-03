@@ -1,23 +1,19 @@
 from django.contrib.auth.views import LoginView
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
-from django.http import Http404, HttpResponseNotFound, HttpResponseServerError
+from django.db.models import Q
+from django.http import HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import CreateView
+from django.views.generic import DetailView, TemplateView
 from django.views.generic.edit import FormMixin
 from django.views.generic.list import ListView
-from django.views.generic import DetailView, TemplateView
-
-from django.core.paginator import Paginator
-from django.core.paginator import EmptyPage
-from django.core.paginator import PageNotAnInteger
 
 from conf.settings import MEDIA_COMPANY_IMAGE_DIR
-from vacancies.forms import MyRegistrationForm, MyLoginForm
 from vacancies.forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
+from vacancies.forms import MyRegistrationForm, MyLoginForm
 from vacancies.models import Application, Company, Specialty, Resume, Vacancy
 
 
@@ -56,7 +52,7 @@ class VacanciesView(ListView):
     paginate_by = 3
 
     def get_queryset(self, **kwargs):
-        return Vacancy.objects.select_related('company').all()
+        return self.model.objects.select_related('company').all()
 
     def get_context_data(self, **kwargs):
         context = super(VacanciesView, self).get_context_data(**kwargs)
@@ -67,12 +63,30 @@ class VacanciesView(ListView):
 class VacanciesSpecialtyView(VacanciesView):
     # вакансии по специализации
     def get_queryset(self, **kwargs):
-        return Vacancy.objects.select_related('company').filter(specialty_id=self.kwargs['specialty'])
+        return self.model.objects.select_related('company').filter(specialty_id=self.kwargs['specialty'])
 
     def get_context_data(self, **kwargs):
         context = super(VacanciesSpecialtyView, self).get_context_data(**kwargs)
         context['specialty'] = get_object_or_404(Specialty, code=self.kwargs['specialty'])
         context['vacancies_count'] = Vacancy.objects.filter(specialty_id=self.kwargs['specialty']).count()
+        return context
+
+
+class SearchView(VacanciesView):
+    # поиск вакансий
+    template_name = 'vacancies/search.html'
+    paginate_by = 3
+
+    def get_queryset(self):
+        request_user = self.request.GET.get('s')
+        return self.model.objects.select_related('company').filter(
+            Q(title__icontains=request_user) | Q(description__icontains=request_user)
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super(SearchView, self).get_context_data(**kwargs)
+        context['s'] = self.request.GET.get('s')
+        context['vacancies_count'] = context['paginator'].count
         return context
 
 
@@ -96,7 +110,7 @@ class VacancyView(FormMixin, DetailView):
     context_object_name = 'vacancy'
     form_class = ApplicationForm
 
-    def vacancies(self):
+    def application(self):
         vacancies = Application.objects.filter(vacancy_id=self.object.pk).filter(user_id=self.request.user.id)
         return vacancies
 
@@ -114,92 +128,23 @@ class VacancyView(FormMixin, DetailView):
         fields = form.save(commit=False)
         fields.user_id = self.request.user.id
         fields.vacancy_id = self.object.pk
-        if self.vacancies:
+        if self.application:
             fields = form.cleaned_data
-            self.vacancies().update(**fields)
+            self.application().update(**fields)
         else:
             form.save()
-        return super().form_valid(form)
+        return redirect('resume_send', vacancy_id=self.object.pk)
 
     def get_context_data(self, **kwargs):
         context = super(VacancyView, self).get_context_data(**kwargs)
-        if self.vacancies:
+        if self.application:
             context['application_sent'] = True
         return context
-
-    # def form_valid(self, form):
-    #     fields = form.save(commit=False)
-    #     fields.user_id = self.request.user.id
-    #     fields.vacacy_id = self.object
-    #     fields.save()
-    #     return super().form_valid(form)
-
-    # def get_success_url(self):
-    #     return reverse('vacancy', kwargs={'pk': self.object.pk})
-
-    # def post(self, request, *args, **kwargs):
-    #     self.object = self.get_object()
-    #     form = self.get_form()
-    #
-    #     if form.is_valid():
-    #         return super(VacancyView, self).form_valid(form)
-    #     else:
-    #         return self.form_invalid(form)
-
-
-# def vacancy_view(request, vacancy_id: int):
-#     # страница вакансии
-#     try:
-#         vacancy = Vacancy.objects.select_related('company').get(id=vacancy_id)
-#         company = vacancy.company
-#     except (Vacancy.DoesNotExist, Company.DoesNotExist):
-#         raise Http404
-#
-#     application_sent = False
-#     user_in_application = Application.objects.filter(vacancy_id=vacancy_id).filter(user_id=request.user.id)
-#
-#     if user_in_application:
-#         # если юзер уже отзывался на эту вакансию
-#         application_sent = True
-#         vacancy_send_form = ApplicationForm(instance=user_in_application.first())
-#         if request.method == 'POST':
-#             vacancy_send_form = ApplicationForm(request.POST, request.FILES)
-#             if vacancy_send_form.is_valid():
-#                 vacancy_data = vacancy_send_form.cleaned_data
-#                 user_in_application.update(**vacancy_data)
-#
-#                 return redirect(resume_sending_view, vacancy_id=vacancy.id)
-#     else:
-#         # пустая форма отклика
-#         vacancy_send_form = ApplicationForm()
-#         if request.method == 'POST':
-#             vacancy_send_form = ApplicationForm(request.POST)
-#             if vacancy_send_form.is_valid():
-#                 vacancy_send_form_data = vacancy_send_form.cleaned_data
-#                 vacancy_send_form_data['user_id'] = request.user.id
-#                 vacancy_send_form_data['vacancy_id'] = vacancy.id
-#                 Application(**vacancy_send_form_data).save()
-#
-#                 return redirect(resume_sending_view, vacancy_id=vacancy.id)
-#
-#
-#     context = {
-#         'form': vacancy_send_form,
-#         'vacancy': vacancy,
-#         'company': company,
-#         'application_sent': application_sent,
-#     }
-#
-#     return render(request, 'vacancies/vacancy.html', context=context)
 
 
 def resume_sending_view(request, vacancy_id):
     # отправка отклика на вакансию
     return render(request, 'vacancies/sent.html', {'vacancy_id': vacancy_id})
-
-
-def search_view(request, query: str):
-    pass
 
 
 #################################################
