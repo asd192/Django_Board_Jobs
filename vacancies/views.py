@@ -35,6 +35,7 @@ class Login(LoginView):
 
 
 class MainView(TemplateView):
+    # главная
     template_name = 'vacancies/main.html'
 
     def get_context_data(self, **kwargs):
@@ -44,63 +45,46 @@ class MainView(TemplateView):
         return context
 
 
-class Vacancies(ListView):
+class VacanciesView(ListView):
+    # все вакансии
     template_name = 'vacancies/vacancies.html'
 
     model = Vacancy
+    context_object_name = 'vacancies'
     paginate_by = 3
 
+    def get_queryset(self, **kwargs):
+        return Vacancy.objects.select_related('company').all()
+
     def get_context_data(self, **kwargs):
-        context = super(Vacancies, self).get_context_data(**kwargs)
-        context['vacancies'] = Vacancy.objects.select_related('company').all()
+        context = super(VacanciesView, self).get_context_data(**kwargs)
         context['vacancies_count'] = Vacancy.objects.count()
-
-        # пагинация
-        paginator = Paginator(context['vacancies'], self.paginate_by)
-        page = self.request.GET.get('page')
-        try:
-            vacancies_pgn = paginator.page(page)
-        except PageNotAnInteger:
-            vacancies_pgn = paginator.page(1)
-        except EmptyPage:
-            vacancies_pgn = paginator.page(paginator.num_pages)
-
-        context['vacancies'] = vacancies_pgn
-
         return context
 
 
-class VacanciesSpecialty(Vacancies):
+class VacanciesSpecialtyView(VacanciesView):
+    # вакансии по специализации
+    def get_queryset(self, **kwargs):
+        return Vacancy.objects.select_related('company').filter(specialty_id=self.kwargs['specialty'])
+
     def get_context_data(self, **kwargs):
-        context = super(VacanciesSpecialty, self).get_context_data(**kwargs)
+        context = super(VacanciesSpecialtyView, self).get_context_data(**kwargs)
         context['specialty'] = get_object_or_404(Specialty, code=self.kwargs['specialty'])
-        context['vacancies'] = Vacancy.objects.select_related('company').filter(specialty_id=context['specialty'])
-        context['vacancies_count'] = len(context['vacancies'])
-
-        # пагинация TODO ДУБЛЬ
-        paginator = Paginator(context['vacancies'], self.paginate_by)
-        page = self.request.GET.get('page')
-        try:
-            vacancies_pgn = paginator.page(page)
-        except PageNotAnInteger:
-            vacancies_pgn = paginator.page(1)
-        except EmptyPage:
-            vacancies_pgn = paginator.page(paginator.num_pages)
-
-        context['vacancies'] = vacancies_pgn
-
+        context['vacancies_count'] = Vacancy.objects.filter(specialty_id=self.kwargs['specialty']).count()
         return context
 
 
-def company_card_view(request, company_id: int):
+class CompanyCardView(VacanciesView):
     # карточка компании
-    company = get_object_or_404(Company, id=company_id)
+    template_name = 'vacancies/company/company.html'
 
-    vacancies = Vacancy.objects.filter(company_id=company_id).values(
-        'id', 'title', 'skills', 'salary_min', 'salary_max', 'published_at', 'company__logo', 'company__name',
-    )
+    def get_queryset(self, **kwargs):
+        return Vacancy.objects.select_related('company').filter(company_id=self.kwargs['company_id'])
 
-    return render(request, 'vacancies/company/company.html', {'vacancies': vacancies, 'company': company})
+    def get_context_data(self, **kwargs):
+        context = super(CompanyCardView, self).get_context_data(**kwargs)
+        context['company'] = get_object_or_404(Company, id=self.kwargs['company_id'])
+        return context
 
 
 def vacancy_view(request, vacancy_id: int):

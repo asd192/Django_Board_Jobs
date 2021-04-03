@@ -21,12 +21,12 @@ from django.contrib.auth.views import LogoutView
 from django.urls import include, path
 
 from vacancies.views import Login, Registration
-from vacancies.views import company_card_view, MainView, vacancy_view, Vacancies
+from vacancies.views import CompanyCardView, MainView, vacancy_view, VacanciesView
 from vacancies.views import custom_handler404, custom_handler500
 from vacancies.views import my_company_empty_view, my_company_view, my_company_letsstart_view
 from vacancies.views import my_resume_empty_view, my_resume_view, my_resume_letsstart_view
 from vacancies.views import my_vacancy_empty_view, my_vacancy_view, my_vacancies_list_view
-from vacancies.views import VacanciesSpecialty, resume_sending_view
+from vacancies.views import VacanciesSpecialtyView, resume_sending_view
 from vacancies.views import search_view
 
 handler404 = custom_handler404
@@ -35,10 +35,10 @@ handler500 = custom_handler500
 urlpatterns = [
     # основные
     path('', MainView.as_view(), name='main'),
-    path('vacancies', Vacancies.as_view(), name='vacancies'),  # все вакансии
+    path('vacancies', VacanciesView.as_view(), name='vacancies'),  # все вакансии
     path('vacancies/<int:vacancy_id>', vacancy_view, name='vacancy'),  # одна вакансия
-    path('vacancies/cat/<str:specialty>', VacanciesSpecialty.as_view(), name='vacancies_specialty'),
-    path('companies/<int:company_id>', company_card_view, name='company'),  # компания
+    path('vacancies/cat/<str:specialty>', VacanciesSpecialtyView.as_view(), name='vacancies_specialty'),
+    path('companies/<int:company_id>', CompanyCardView.as_view(), name='company'),  # компания
     path('vacancies/<int:vacancy_id>/send/', resume_sending_view, name='resume_send'),  # отправка заявки
     path('search?s=<query>', search_view, name='search'),
 

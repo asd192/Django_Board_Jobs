@@ -1,5 +1,6 @@
 {% extends 'vacancies/base.html' %}
 
+{% load bootstrap_pagination %}
 {% load my_filters %}
 
 {% block title %}{{ titles }}{% endblock title %}
@@ -39,33 +40,11 @@
                         </div>
 
                     {% endfor %}
-
-                    <!-- Pagination -->
-                    {% if is_paginated %}
-
-                        <div class="container">
-                            <div class="row">
-
-                                <div class="col-sm-4 text-right">
-                                    {% if page_obj.has_previous %}
-                                        <span><a href="?page={{ page_obj.previous_page_number }}">Назад</a></span>
-                                    {% endif %}
-                                </div>
-
-                                <div class="col-sm-4 text-center">
-                                    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
-                                </div>
-
-                                <div class="col-sm-4">
-                                    {% if page_obj.has_next %}
-                                        <span><a href="?page={{ page_obj.next_page_number }}">Вперед</a></span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                    {% endif %}
-
+                {%  if is_paginated %}
+                    <div class="paginator">
+                        {% bootstrap_paginate page_obj range=5 show_prev_next="false" show_first_last="true" %}
+                    </div>
+                {%  endif %}
                 </div>
             </div>
         </section>
