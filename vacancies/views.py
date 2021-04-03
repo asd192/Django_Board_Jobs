@@ -96,6 +96,10 @@ class VacancyView(FormMixin, DetailView):
     context_object_name = 'vacancy'
     form_class = ApplicationForm
 
+    def vacancies(self):
+        vacancies = Application.objects.filter(vacancy_id=self.object.pk).filter(user_id=self.request.user.id)
+        return vacancies
+
     def get_success_url(self):
         return reverse('vacancy', kwargs={'pk': self.object.pk})
 
@@ -103,24 +107,23 @@ class VacancyView(FormMixin, DetailView):
         self.object = self.get_object()
         form = self.get_form()
         if form.is_valid():
-                return self.form_valid(form)
-        # else:
-        #     return self.form_invalid(form)
+            return self.form_valid(form)
+        return super().form_invalid(form)
 
     def form_valid(self, form):
         fields = form.save(commit=False)
         fields.user_id = self.request.user.id
         fields.vacancy_id = self.object.pk
-        if Application.objects.filter(vacancy_id=self.object.pk).filter(user_id=self.request.user.id):
+        if self.vacancies:
             fields = form.cleaned_data
-            Application.objects.filter(vacancy_id=self.object.pk).filter(user_id=self.request.user.id).update(**fields)
+            self.vacancies().update(**fields)
         else:
             form.save()
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super(VacancyView, self).get_context_data(**kwargs)
-        if Application.objects.filter(vacancy_id=self.object.pk).filter(user_id=self.request.user.id):
+        if self.vacancies:
             context['application_sent'] = True
         return context
 
@@ -142,7 +145,6 @@ class VacancyView(FormMixin, DetailView):
     #         return super(VacancyView, self).form_valid(form)
     #     else:
     #         return self.form_invalid(form)
-
 
 
 # def vacancy_view(request, vacancy_id: int):
