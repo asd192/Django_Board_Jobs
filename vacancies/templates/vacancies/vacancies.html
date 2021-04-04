@@ -3,7 +3,7 @@
 {% load bootstrap_pagination %}
 {% load my_filters %}
 
-{% block title %}{{ titles }}{% endblock title %}
+{% block title_head %}{% if request.path == '/vacancies' %}Все вакансии{% else %}{{ specialty }}{% endif %} | Board Jobs{% endblock title_head %}
 
 {% block container %}
 

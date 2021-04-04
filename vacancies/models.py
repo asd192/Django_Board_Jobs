@@ -69,7 +69,7 @@ class Application(models.Model):
     written_phone = PhoneNumberField("номер телефона", region='RU')
     written_cover_letter = models.TextField("сопроводительное письмо", max_length=10000)
     written_photo = models.ImageField(
-        "фотография", upload_to=MEDIA_USER_PHOTO_IMAGE_DIR, default="", blank=True,
+        "фотография", upload_to=MEDIA_USER_PHOTO_IMAGE_DIR, blank=True,
     )
     vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name="applications")
     user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="applications", null=True)

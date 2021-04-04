@@ -9,7 +9,7 @@ from django.shortcuts import render
 from django.views.generic import CreateView, TemplateView, View
 from django.views.generic.list import ListView
 
-from conf.settings import MEDIA_COMPANY_IMAGE_DIR
+from conf.settings import MEDIA_COMPANY_IMAGE_DIR, MEDIA_USER_PHOTO_IMAGE_DIR
 from vacancies.forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
 from vacancies.forms import MyRegistrationForm, MyLoginForm, ProfileForm
 from vacancies.models import Application, Company, Specialty, Resume, Vacancy
@@ -28,6 +28,7 @@ class Login(LoginView):
     form_class = MyLoginForm
     redirect_authenticated_user = True
     template_name = 'vacancies/auth_reg/login.html'
+    extra_context = {'title': 'Абра-Кадабра'}
 
 
 def user_profile_view(request):
@@ -125,6 +126,7 @@ def vacancy_view(request, vacancy_id: int):
     application_sent = False
     user_in_application = Application.objects.filter(vacancy_id=vacancy_id).filter(user_id=request.user.id)
 
+    # FIXME не загружается фото
     if user_in_application:
         # если юзер уже отзывался на эту вакансию
         application_sent = True
@@ -133,6 +135,8 @@ def vacancy_view(request, vacancy_id: int):
             vacancy_send_form = ApplicationForm(request.POST, request.FILES)
             if vacancy_send_form.is_valid():
                 vacancy_data = vacancy_send_form.cleaned_data
+                vacancy_data['written_photo'] = f"{MEDIA_USER_PHOTO_IMAGE_DIR}/{vacancy_data['written_photo']}"
+                print(vacancy_data)
                 user_in_application.update(**vacancy_data)
 
                 return redirect('resume_send', vacancy_id=vacancy.id)
