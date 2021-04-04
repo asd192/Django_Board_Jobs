@@ -1,8 +1,9 @@
+from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.db.models import Count
 from django.db.models import Q
-from django.http import HttpResponseNotFound, HttpResponseServerError, Http404
+from django.http import HttpResponseNotFound, HttpResponseServerError, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
@@ -246,9 +247,11 @@ def my_vacancy_empty_view(request):
 
     message = ''
     if request.method == 'POST':
-        vacancy_empty_form = CompanyForm(request.POST)
+        vacancy_empty_form = VacancyForm(request.POST)
         if vacancy_empty_form.is_valid():
-            vacancy_empty_form.save()
+            form_data = vacancy_empty_form.save(commit=False)
+            form_data.company_id = Company.objects.get(owner_id=request.user.id).id
+            form_data.save()
             message = 'success'
 
     return render(request, 'vacancies/company/vacancy-edit.html', {'form': vacancy_empty_form, 'message': message})
