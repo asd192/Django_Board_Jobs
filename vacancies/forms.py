@@ -3,7 +3,6 @@ from crispy_forms.layout import Column, HTML, Layout, Row, Submit
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UsernameField, AuthenticationForm
 from django.contrib.auth.models import User
-from phonenumber_field.modelfields import PhoneNumberField
 
 from vacancies.models import Application, Company, Vacancy, Resume
 
@@ -19,7 +18,7 @@ class MyRegistrationForm(UserCreationForm):
         self.fields['first_name'].help_text = 'Не менее 2-ух букв'
         self.fields['last_name'].help_text = 'Не менее 3-ёх букв'
         self.fields[
-            'password1'].help_text = 'Придумайте надёжный пароль не менее 8 символов. Пароль не может состоять только из цифр.'
+            'password1'].help_text = 'Придумайте надёжный пароль не менее 8 символов.'
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -76,19 +75,19 @@ class CompanyForm(forms.ModelForm):
                                 width="140 height="60">
                             </div>
                         </div>
-                        '''
+                        ''',
                     ),
-                    Column('logo', css_class='form-group')
-                )
+                    Column('logo', css_class='form-group'),
+                ),
             ),
             Row(
                 Column('name', css_class='form-group'),
-                css_class='form-row'
+                css_class='form-row',
             ),
             Row(
                 Column('employee_count', css_class='form-group'),
                 Column('location', css_class='form-group'),
-                css_class='form-row'
+                css_class='form-row',
             ),
             'description',
         )
@@ -142,7 +141,7 @@ class ApplicationForm(forms.ModelForm):
         model = Application
         fields = ('written_username', 'written_phone', 'written_cover_letter', 'written_photo')
         error_messages = {
-            'written_phone': {'invalid': 'Введите корректный номер телефона. Пример: +7 999 887 33 22'}
+            'written_phone': {'invalid': 'Введите корректный номер телефона. Пример: +7 999 887 33 22'},
         }
 
 
@@ -162,17 +161,17 @@ class ResumeForm(forms.ModelForm):
             Row(
                 Column('name', css_class='form-group'),
                 Column('surname', css_class='form-group'),
-                css_class='form-row'
+                css_class='form-row',
             ),
             Row(
                 Column('status', css_class='form-group'),
                 Column('salary', css_class='form-group'),
-                css_class='form-row'
+                css_class='form-row',
             ),
             Row(
                 Column('specialty', css_class='form-group'),
                 Column('grade', css_class='form-group'),
-                css_class='form-row'
+                css_class='form-row',
             ),
             'education',
             'experience',

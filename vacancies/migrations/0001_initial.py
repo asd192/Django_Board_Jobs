@@ -7,7 +7,6 @@ import phonenumber_field.modelfields
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -22,9 +21,13 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=100, verbose_name='название')),
                 ('location', models.CharField(max_length=25, verbose_name='город')),
                 ('description', models.TextField(max_length=5000, verbose_name='информация о компании')),
-                ('employee_count', models.CharField(choices=[('1', '0-15'), ('2', '15-100'), ('3', '100-500'), ('4', '500-1000'), ('5', '> 1000')], max_length=10, verbose_name='количество сотрудников')),
-                ('logo', models.ImageField(default='company_images/100x60.gif', upload_to='company_images', verbose_name='логотип')),
-                ('owner', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='owner_user', to=settings.AUTH_USER_MODEL)),
+                ('employee_count', models.CharField(
+                    choices=[('1', '0-15'), ('2', '15-100'), ('3', '100-500'), ('4', '500-1000'), ('5', '> 1000')],
+                    max_length=10, verbose_name='количество сотрудников')),
+                ('logo', models.ImageField(default='company_images/100x60.gif', upload_to='company_images',
+                                           verbose_name='логотип')),
+                ('owner', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='owner_user',
+                                               to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'компания',
@@ -36,7 +39,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('code', models.CharField(max_length=30, primary_key=True, serialize=False, verbose_name='код')),
                 ('title', models.CharField(max_length=100, verbose_name='название')),
-                ('picture', models.ImageField(default='speciality_images/100x60.gif', upload_to='speciality_images', verbose_name='изображение')),
+                ('picture', models.ImageField(default='speciality_images/100x60.gif', upload_to='speciality_images',
+                                              verbose_name='изображение')),
             ],
             options={
                 'verbose_name': 'специализация',
@@ -53,8 +57,10 @@ class Migration(migrations.Migration):
                 ('salary_min', models.IntegerField(verbose_name='зарплата от')),
                 ('salary_max', models.IntegerField(verbose_name='зарплата до')),
                 ('published_at', models.DateField(auto_now_add=True, verbose_name='опубликовано')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vacancies', to='vacancies.company', verbose_name='компания')),
-                ('specialty', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='vacancies', to='vacancies.specialty', verbose_name='специализация')),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vacancies',
+                                              to='vacancies.company', verbose_name='компания')),
+                ('specialty', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='vacancies',
+                                                to='vacancies.specialty', verbose_name='специализация')),
             ],
             options={
                 'verbose_name': 'вакансия',
@@ -67,14 +73,21 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=15, verbose_name='имя')),
                 ('surname', models.CharField(max_length=30, verbose_name='фамилия')),
-                ('status', models.CharField(choices=[('1', 'Не ищу работу'), ('2', 'Рассматриваю предложения'), ('3', 'Ищу работу')], max_length=10, verbose_name='готовность к работе')),
+                ('status', models.CharField(
+                    choices=[('1', 'Не ищу работу'), ('2', 'Рассматриваю предложения'), ('3', 'Ищу работу')],
+                    max_length=10, verbose_name='готовность к работе')),
                 ('salary', models.IntegerField(verbose_name='ожидаемое вознаграждение')),
-                ('grade', models.CharField(choices=[('1', 'Стажер'), ('2', 'Джуниор'), ('3', 'Миддл'), ('4', 'Синьор'), ('5', 'Лид')], max_length=10, verbose_name='квалификация')),
+                ('grade', models.CharField(
+                    choices=[('1', 'Стажер'), ('2', 'Джуниор'), ('3', 'Миддл'), ('4', 'Синьор'), ('5', 'Лид')],
+                    max_length=10, verbose_name='квалификация')),
                 ('education', models.TextField(max_length=1000, verbose_name='образование')),
                 ('experience', models.TextField(max_length=1000, verbose_name='опыт работы')),
                 ('portfolio', models.URLField(max_length=100, verbose_name='ссылка на портфолио')),
-                ('specialty', models.ForeignKey(max_length=30, on_delete=django.db.models.deletion.CASCADE, to='vacancies.specialty', verbose_name='специализация')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='resumes', to=settings.AUTH_USER_MODEL)),
+                ('specialty',
+                 models.ForeignKey(max_length=30, on_delete=django.db.models.deletion.CASCADE, to='vacancies.specialty',
+                                   verbose_name='специализация')),
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='resumes',
+                                              to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'резюме',
@@ -86,11 +99,16 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('written_username', models.CharField(max_length=50, verbose_name='имя')),
-                ('written_phone', phonenumber_field.modelfields.PhoneNumberField(error_messages={'invalid': 'Введите корректный номер телефона. Пример: +7 999 887 33 22'}, max_length=128, region='RU', verbose_name='номер телефона')),
+                ('written_phone', phonenumber_field.modelfields.PhoneNumberField(
+                    error_messages={'invalid': 'Введите корректный номер телефона. Пример: +7 999 887 33 22'},
+                    max_length=128, region='RU', verbose_name='номер телефона')),
                 ('written_cover_letter', models.TextField(max_length=10000, verbose_name='сопроводительное письмо')),
-                ('written_photo', models.ImageField(blank=True, default='', null=True, upload_to='user/photo"', verbose_name='фотография')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to=settings.AUTH_USER_MODEL)),
-                ('vacancy', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='vacancies.vacancy')),
+                ('written_photo', models.ImageField(blank=True, default='', null=True, upload_to='user/photo"',
+                                                    verbose_name='фотография')),
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='applications',
+                                              to=settings.AUTH_USER_MODEL)),
+                ('vacancy', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications',
+                                              to='vacancies.vacancy')),
             ],
             options={
                 'verbose_name': 'отклик',

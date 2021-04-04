@@ -5,7 +5,6 @@ import phonenumber_field.modelfields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('vacancies', '0001_initial'),
     ]
@@ -14,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='application',
             name='written_phone',
-            field=phonenumber_field.modelfields.PhoneNumberField(max_length=128, region=None, verbose_name='номер телефона'),
+            field=phonenumber_field.modelfields.PhoneNumberField(max_length=128, region=None,
+                                                                 verbose_name='номер телефона'),
         ),
     ]

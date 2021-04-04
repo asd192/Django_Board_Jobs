@@ -1,7 +1,6 @@
+from django.contrib.auth.models import User
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
-
-from django.contrib.auth.models import User
 
 from conf.settings import MEDIA_COMPANY_IMAGE_DIR, MEDIA_USER_PHOTO_IMAGE_DIR, MEDIA_SPECIALITY_IMAGE_DIR
 
@@ -46,9 +45,9 @@ class Company(models.Model):
 
 
 class Vacancy(models.Model):
-    title = models.CharField("название вакансии", max_length=100)
+    title = models.CharField("название вакансии", max_length=100, db_index=True)
     skills = models.CharField("навыки", max_length=500)
-    description = models.TextField("описание вакансии", max_length=10000)
+    description = models.TextField("описание вакансии", max_length=10000, db_index=True)
     salary_min = models.IntegerField("зарплата от")
     salary_max = models.IntegerField("зарплата до")
     published_at = models.DateField("опубликовано", auto_now_add=True)
@@ -71,10 +70,10 @@ class Application(models.Model):
     written_phone = PhoneNumberField("номер телефона", region='RU')
     written_cover_letter = models.TextField("сопроводительное письмо", max_length=10000)
     written_photo = models.ImageField(
-        "фотография", upload_to=MEDIA_USER_PHOTO_IMAGE_DIR, default="", blank=True, null=True
+        "фотография", upload_to=MEDIA_USER_PHOTO_IMAGE_DIR, default="", blank=True,
     )
     vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name="applications")
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="applications")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="applications", null=True)
 
     class Meta:
         verbose_name = "отклик"

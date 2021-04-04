@@ -1,13 +1,11 @@
 from django.contrib.auth.views import LoginView
 from django.db.models import Count
 from django.db.models import Q
-from django.http import HttpResponseNotFound, HttpResponseServerError
+from django.http import HttpResponseNotFound, HttpResponseServerError, Http404
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
-from django.urls import reverse
-from django.views.generic import CreateView, DetailView, TemplateView, View
-from django.views.generic.edit import FormMixin
+from django.views.generic import CreateView, TemplateView, View
 from django.views.generic.list import ListView
 
 from conf.settings import MEDIA_COMPANY_IMAGE_DIR
@@ -77,7 +75,7 @@ class SearchView(VacanciesView):
     def get_queryset(self):
         request_user = self.request.GET.get('s')
         return self.model.objects.select_related('company').filter(
-            Q(title__icontains=request_user) | Q(description__icontains=request_user)
+            Q(title__icontains=request_user) | Q(description__icontains=request_user),
         )
 
     def get_context_data(self, **kwargs):
@@ -100,43 +98,49 @@ class CompanyCardView(VacanciesView):
         return context
 
 
-class VacancyView(FormMixin, DetailView):
-    # вакансия
-    template_name = 'vacancies/vacancy.html'
-    model = Vacancy
-    context_object_name = 'vacancy'
-    form_class = ApplicationForm
+def vacancy_view(request, vacancy_id: int):
+    # страница вакансии
+    try:
+        vacancy = Vacancy.objects.select_related('company').get(id=vacancy_id)
+        company = vacancy.company
+    except (Vacancy.DoesNotExist, Company.DoesNotExist):
+        raise Http404
 
-    def application(self):
-        vacancies = Application.objects.filter(vacancy_id=self.object.pk).filter(user_id=self.request.user.id)
-        return vacancies
+    application_sent = False
+    user_in_application = Application.objects.filter(vacancy_id=vacancy_id).filter(user_id=request.user.id)
 
-    # def get_success_url(self):
-    #     return reverse('vacancy', kwargs={'pk': self.object.pk})
+    if user_in_application:
+        # если юзер уже отзывался на эту вакансию
+        application_sent = True
+        vacancy_send_form = ApplicationForm(instance=user_in_application.first())
+        if request.method == 'POST':
+            vacancy_send_form = ApplicationForm(request.POST, request.FILES)
+            if vacancy_send_form.is_valid():
+                vacancy_data = vacancy_send_form.cleaned_data
+                user_in_application.update(**vacancy_data)
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = self.get_form()
-        if form.is_valid():
-            return self.form_valid(form)
-        return super().form_invalid(form)
+                return redirect('resume_send', vacancy_id=vacancy.id)
+    else:
+        # пустая форма отклика
+        vacancy_send_form = ApplicationForm()
+        if request.method == 'POST':
+            vacancy_send_form = ApplicationForm(request.POST)
+            if vacancy_send_form.is_valid():
+                vacancy_send_form_data = vacancy_send_form.cleaned_data
+                vacancy_send_form_data['user_id'] = request.user.id
+                vacancy_send_form_data['vacancy_id'] = vacancy.id
+                Application(**vacancy_send_form_data).save()
 
-    def form_valid(self, form):
-        fields = form.save(commit=False)
-        fields.user_id = self.request.user.id
-        fields.vacancy_id = self.object.pk
-        if self.application:
-            fields = form.cleaned_data
-            self.application().update(**fields)
-        else:
-            form.save()
-        return redirect('resume_send', vacancy_id=self.object.pk)
+                return redirect('resume_send', vacancy_id=vacancy.id)
 
-    def get_context_data(self, **kwargs):
-        context = super(VacancyView, self).get_context_data(**kwargs)
-        if self.application:
-            context['application_sent'] = True
-        return context
+    context = {
+        'form': vacancy_send_form,
+        'vacancy': vacancy,
+        'company': company,
+        'application_sent': application_sent,
+    }
+
+    return render(request, 'vacancies/vacancy.html', context=context)
 
 
 class ResumeSendingView(TemplateView):
@@ -154,15 +158,6 @@ class MyCompanyLetsstarView(View):
             return redirect('my_company_form')
         else:
             return render(request, 'vacancies/company/company-create.html')
-
-# def my_company_letsstart_view(request):
-#     # проверка наличия компании
-#     # если компания ужесоздана
-#     company_exists = Company.objects.filter(owner_id=request.user.id).values()
-#     if company_exists:
-#         return redirect(my_company_view)
-#
-#     return render(request, 'vacancies/company/company-create.html')
 
 
 def my_company_empty_view(request):
@@ -225,7 +220,7 @@ def my_vacancies_list_view(request):
             return redirect('login')
 
     vacancies = Vacancy.objects.filter(company_id=company)
-    # vacancies = Application.objects.select_related('vacancy').exclude(vacancy__company_id=3)
+
     return render(request, 'vacancies/company/vacancy-list.html', {'vacancies': vacancies})
 
 
