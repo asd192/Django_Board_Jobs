@@ -6,8 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
-from django.views.generic import CreateView
-from django.views.generic import DetailView, TemplateView
+from django.views.generic import CreateView, DetailView, TemplateView, UpdateView, View
 from django.views.generic.edit import FormMixin
 from django.views.generic.list import ListView
 
@@ -46,7 +45,6 @@ class MainView(TemplateView):
 class VacanciesView(ListView):
     # все вакансии
     template_name = 'vacancies/vacancies.html'
-
     model = Vacancy
     context_object_name = 'vacancies'
     paginate_by = 3
@@ -75,7 +73,6 @@ class VacanciesSpecialtyView(VacanciesView):
 class SearchView(VacanciesView):
     # поиск вакансий
     template_name = 'vacancies/search.html'
-    paginate_by = 3
 
     def get_queryset(self):
         request_user = self.request.GET.get('s')
@@ -104,8 +101,8 @@ class CompanyCardView(VacanciesView):
 
 
 class VacancyView(FormMixin, DetailView):
+    # вакансия
     template_name = 'vacancies/vacancy.html'
-
     model = Vacancy
     context_object_name = 'vacancy'
     form_class = ApplicationForm
@@ -113,9 +110,6 @@ class VacancyView(FormMixin, DetailView):
     def application(self):
         vacancies = Application.objects.filter(vacancy_id=self.object.pk).filter(user_id=self.request.user.id)
         return vacancies
-
-    def get_success_url(self):
-        return reverse('vacancy', kwargs={'pk': self.object.pk})
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -142,72 +136,67 @@ class VacancyView(FormMixin, DetailView):
         return context
 
 
-def resume_sending_view(request, vacancy_id):
-    # отправка отклика на вакансию
-    return render(request, 'vacancies/sent.html', {'vacancy_id': vacancy_id})
+class ResumeSendingView(TemplateView):
+    template_name = 'vacancies/sent.html'
 
 
 #################################################
 #                   Компания                    #
 #################################################
-def my_company_letsstart_view(request):
-    # проверка наличия компании
-    # если компания ужесоздана
-    company_exists = Company.objects.filter(owner_id=request.user.id).values()
-    if company_exists:
-        return redirect(my_company_view)
+class MyCompanyLetsstarView(View):
+    template_name = 'vacancies/company/company-create.html'
 
-    return render(request, 'vacancies/company/company-create.html')
-
-
-def my_company_empty_view(request):
-    # пустая форма компании
-    if not request.user.is_authenticated:
-        return redirect('login')
-
-    # если компания уже создана
-    company_exists = Company.objects.filter(owner_id=request.user.id).values()
-    if company_exists:
-        return redirect(my_company_view)
-
-    message = ''
-    company_form = CompanyForm()
-    if request.method == 'POST':
-        company_form = CompanyForm(request.POST, request.FILES)
-        if company_form.is_valid():
-            company_form_update = company_form.save(commit=False)
-            company_form_update.owner_id = request.user.id
-            company_form.save()
-            message = 'success'
-
-    return render(request, 'vacancies/company/company-edit.html', {'form': company_form, 'message': message})
-
-
-def my_company_view(request):
-    # заполненная форма компании
-    try:
-        company = Company.objects.get(owner_id=request.user.id)
-    except Company.DoesNotExist:
-        # если в обход меню на /mycompany
-        if request.user.is_authenticated:
-            return redirect(my_company_letsstart_view)
+    def get(self, request, *args, **kwargs):
+        if Company.objects.filter(owner_id=request.user.id).values():
+            return redirect('my_company_form')
         else:
-            return redirect('login')
+            return render(request, 'vacancies/company/company-create.html')
 
-    company_form = CompanyForm(instance=company)
 
-    message = ''
-    if request.method == 'POST':
-        company_form = CompanyForm(request.POST, request.FILES)
-        if company_form.is_valid():
-            company_data = company_form.cleaned_data
-            company_data['logo'] = f"{MEDIA_COMPANY_IMAGE_DIR}/{company_data['logo']}"
-            # company_data['logo'] = company_data['logo']
+class MyCompanyEmptyFormView(CreateView):
+    template_name = 'vacancies/company/company-edit.html'
+    form_class = CompanyForm
 
-            Company.objects.filter(owner_id=request.user.id).update(**company_data)
-            message = 'success'
+    def get_success_url(self):
+        return redirect('my_company_letsstart')
 
-    return render(request, 'vacancies/company/company-edit.html', {'form': company_form, 'message': message})
+    def form_valid(self, form):
+        fields = form.save(commit=False)
+        fields.owner_id = self.request.user.id
+        form.save()
+        return redirect('my_company_letsstart')
+
+
+class MyCompanyFormView(UpdateView):
+    template_name = 'vacancies/company/company-edit.html'
+    form_class = CompanyForm
+
+
+# def my_company_view(request):
+#     # заполненная форма компании
+#     try:
+#         company = Company.objects.get(owner_id=request.user.id)
+#     except Company.DoesNotExist:
+#         # если в обход меню на /mycompany
+#         if request.user.is_authenticated:
+#             return redirect('my_company_letsstart')
+#         else:
+#             return redirect('login')
+#
+#     company_form = CompanyForm(instance=company)
+#
+#     message = ''
+#     if request.method == 'POST':
+#         company_form = CompanyForm(request.POST, request.FILES)
+#         if company_form.is_valid():
+#             company_data = company_form.cleaned_data
+#             # company_data['logo'] = f"{MEDIA_COMPANY_IMAGE_DIR}/{company_data['logo']}"
+#             # company_data['logo'] = company_data['logo']
+#
+#             Company.objects.filter(owner_id=request.user.id).update(**company_data)
+#             message = 'success'
+#
+#     return render(request, 'vacancies/company/company-edit.html', {'form': company_form, 'message': message})
 
 
 def my_vacancies_list_view(request):
@@ -217,12 +206,12 @@ def my_vacancies_list_view(request):
     except Company.DoesNotExist:
         # если в обход меню на /mycompany/vacancies/
         if request.user.is_authenticated:
-            return redirect(my_company_letsstart_view)
+            return redirect('my_company_letsstart')
         else:
             return redirect('login')
 
     vacancies = Vacancy.objects.filter(company_id=company)
-
+    # vacancies = Application.objects.select_related('vacancy').exclude(vacancy__company_id=3)
     return render(request, 'vacancies/company/vacancy-list.html', {'vacancies': vacancies})
 
 
@@ -241,14 +230,12 @@ def my_vacancy_empty_view(request):
 
 
 def my_vacancy_view(request, vacancy_id: int):
-    # TODO добавить ссылку на профиль откликнувшегося
     # заполненная форма вакансий
+    vacancy = get_object_or_404(Vacancy, id=vacancy_id)
     applications = Application.objects.filter(vacancy_id=vacancy_id)
 
     message = ''
-    vacancy = get_object_or_404(Vacancy, id=vacancy_id)
     my_vacancy_form = VacancyForm(instance=vacancy)
-
     if request.method == 'POST':
         my_vacancy_form = VacancyForm(request.POST)
         if my_vacancy_form.is_valid():

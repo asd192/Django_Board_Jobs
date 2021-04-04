@@ -23,10 +23,10 @@ from django.urls import include, path
 from vacancies.views import Login, Registration
 from vacancies.views import CompanyCardView, MainView, VacancyView, VacanciesView
 from vacancies.views import custom_handler404, custom_handler500
-from vacancies.views import my_company_empty_view, my_company_view, my_company_letsstart_view
+from vacancies.views import MyCompanyEmptyFormView, MyCompanyFormView, MyCompanyLetsstarView
 from vacancies.views import my_resume_empty_view, my_resume_view, my_resume_letsstart_view
 from vacancies.views import my_vacancy_empty_view, my_vacancy_view, my_vacancies_list_view
-from vacancies.views import VacanciesSpecialtyView, resume_sending_view
+from vacancies.views import VacanciesSpecialtyView, ResumeSendingView
 from vacancies.views import SearchView
 
 handler404 = custom_handler404
@@ -39,13 +39,13 @@ urlpatterns = [
     path('vacancies/<int:pk>', VacancyView.as_view(), name='vacancy'),  # одна вакансия
     path('vacancies/cat/<str:specialty>', VacanciesSpecialtyView.as_view(), name='vacancies_specialty'),
     path('companies/<int:company_id>', CompanyCardView.as_view(), name='company'),  # компания
-    path('vacancies/<int:vacancy_id>/send/', resume_sending_view, name='resume_send'),  # отправка заявки
+    path('vacancies/<int:vacancy_id>/send/', ResumeSendingView.as_view(), name='resume_send'),  # отправка заявки
     path('search', SearchView.as_view(), name='search'),
 
     # компания
-    path('mycompany/letsstart/', my_company_letsstart_view, name='my_company_letsstart'),  # создать компанию
-    path('mycompany/create/', my_company_empty_view, name='my_company_empty_form'),  # пустая форма
-    path('mycompany/', my_company_view, name='my_company_form'),  # заполненная форма
+    path('mycompany/letsstart/', MyCompanyLetsstarView.as_view(), name='my_company_letsstart'),  # создать компанию
+    path('mycompany/create/', MyCompanyEmptyFormView.as_view(), name='my_company_empty_form'),  # пустая форма
+    path('mycompany/', MyCompanyFormView.as_view(), name='my_company_form'),  # заполненная форма
     # компания -> вакансии
     path('mycompany/vacancies/', my_vacancies_list_view, name='my_vacancies'),  # мои вакансии - список
     path('mycompany/vacancies/create/', my_vacancy_empty_view, name='my_vacancy_empty_form'),  # пустая форма

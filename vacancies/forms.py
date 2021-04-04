@@ -57,7 +57,7 @@ class CompanyForm(forms.ModelForm):
         self.fields['location'].help_text = 'Не более 25 символов'
         self.fields['employee_count'].help_text = 'Выберите вариант'
         self.fields['description'].help_text = 'Опишите чем занимается компания'
-        self.fields['logo'].button_text = 'Кнопка'
+        self.fields['logo'].help_text = 'Логотип компании'
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
