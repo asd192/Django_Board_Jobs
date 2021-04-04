@@ -5,7 +5,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 from conf.settings import MEDIA_COMPANY_IMAGE_DIR, MEDIA_USER_PHOTO_IMAGE_DIR, MEDIA_SPECIALITY_IMAGE_DIR
 
 
-# TODO настроить поля
 class Specialty(models.Model):
     code = models.CharField("код", primary_key=True, max_length=30)
     title = models.CharField("название", max_length=100)

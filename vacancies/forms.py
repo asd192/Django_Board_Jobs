@@ -181,3 +181,29 @@ class ResumeForm(forms.ModelForm):
     class Meta:
         model = Resume
         fields = ("name", "surname", "status", "salary", "specialty", "grade", "education", "experience", "portfolio")
+
+
+class ProfileForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Обновить'))
+
+        self.helper.form_class = 'form-horizontal'
+        self.helper.label_class = 'pb-1'
+        self.helper.field_class = 'col-12'
+
+        self.helper.layout = Layout(
+            'email',
+            Row(
+                Column('first_name', css_class='form-group'),
+                Column('last_name', css_class='form-group'),
+                css_class='form-row',
+            ),
+        )
+
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "email")

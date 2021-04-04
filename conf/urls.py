@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.contrib.auth.views import LogoutView
 from django.urls import include, path
 
-from vacancies.views import Login, Registration
+from vacancies.views import Login, Registration, user_profile_view
 from vacancies.views import CompanyCardView, MainView, vacancy_view, VacanciesView
 from vacancies.views import custom_handler404, custom_handler500
 from vacancies.views import my_company_empty_view, my_company_view, MyCompanyLetsstarView
@@ -41,6 +41,7 @@ urlpatterns = [
     path('companies/<int:company_id>', CompanyCardView.as_view(), name='company'),  # компания
     path('vacancies/<int:vacancy_id>/send/', ResumeSendingView.as_view(), name='resume_send'),  # отправка заявки
     path('search', SearchView.as_view(), name='search'),
+    path('profile', user_profile_view, name='user_profile'),
 
     # компания
     path('mycompany/letsstart/', MyCompanyLetsstarView.as_view(), name='my_company_letsstart'),  # создать компанию

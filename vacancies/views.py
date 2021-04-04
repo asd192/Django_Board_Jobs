@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.db.models import Count
 from django.db.models import Q
@@ -10,7 +11,7 @@ from django.views.generic.list import ListView
 
 from conf.settings import MEDIA_COMPANY_IMAGE_DIR
 from vacancies.forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
-from vacancies.forms import MyRegistrationForm, MyLoginForm
+from vacancies.forms import MyRegistrationForm, MyLoginForm, ProfileForm
 from vacancies.models import Application, Company, Specialty, Resume, Vacancy
 
 
@@ -27,6 +28,21 @@ class Login(LoginView):
     form_class = MyLoginForm
     redirect_authenticated_user = True
     template_name = 'vacancies/auth_reg/login.html'
+
+
+def user_profile_view(request):
+    user = get_object_or_404(User, id=request.user.id)
+
+    message = ''
+    profile_form = ProfileForm(instance=user)
+    if request.method == 'POST':
+        profile_form = ProfileForm(request.POST)
+        if profile_form.is_valid():
+            vacancy_data = profile_form.cleaned_data
+            User.objects.filter(id=request.user.id).update(**vacancy_data)
+            message = 'success'
+
+    return render(request, 'vacancies/profile.html', {'form': profile_form, 'message': message})
 
 
 class MainView(TemplateView):
