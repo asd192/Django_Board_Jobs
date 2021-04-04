@@ -5,7 +5,6 @@ from django.contrib.auth.forms import UserCreationForm, UsernameField, Authentic
 from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
 
-
 from vacancies.models import Application, Company, Vacancy, Resume
 
 
@@ -68,33 +67,21 @@ class CompanyForm(forms.ModelForm):
         self.helper.field_class = 'col-12'
 
         self.helper.layout = Layout(
-            Column(
-                HTML(
-                    '''
-                    <div class="form-group row">
-                        <div class="mx-auto">
-                            <div class="form-group">{% if form.logo.value %}<img src="{{ form.logo.value.url }}"{% endif %}
-                            width="140 height="60"></div>
-                        </div>
-                    </div>   
-                    '''
-                )
-            ),
             Row(
                 Column(
                     HTML(
                         '''
-                        <label class="col-form-label pb-1 requiredField">Логотип*</label>
-                        <div class="form-group">
-                           <div class="col-12">
-                            <input type="file" class="custom-file-input" id="id_logo">
-                            <label class="custom-file-label" for="id_logo">JPG/PNG/GIF</label>
-                          </div>
-                          <small id="hint_id_logo" class="form-text text-muted">Нажмите на поле, чтобы загрузить</small>
+                        <div class="row">
+                            <div class="mx-auto">{% if form.logo.value %}<img src="{{ form.logo.value.url }}"{% endif %}
+                                width="140 height="60">
+                            </div>
                         </div>
                         '''
-                    )
-                ),
+                    ),
+                    Column('logo', css_class='form-group')
+                )
+            ),
+            Row(
                 Column('name', css_class='form-group'),
                 css_class='form-row'
             ),

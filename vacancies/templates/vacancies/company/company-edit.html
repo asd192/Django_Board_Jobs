@@ -21,10 +21,14 @@
                             <p class="alert alert-info" role="alert">
                                 Информация о компании обновлена
                             </p>
-                            {% endif %}
+                                <a href="{% url 'my_company_letsstart' %}"
+                                                       class="btn btn-outline-info">Ok</a>
+                            {% else %}
 
                             {% load crispy_forms_tags %}
                             {% crispy form "bootstrap4" %}
+
+                            {% endif %}
 
                         </section>
                         <!-- END Tab -->
