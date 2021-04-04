@@ -40,7 +40,7 @@
                                                     <p class="mb-1">
                                                         <span class="mr-4">от {{ vacancy.salary_min }}</span>
                                                         <a href="{% url 'my_vacancy_form' vacancy.id %}#application-sents"
-                                                           class="text-info">{{ vacancies|length|ru_pluralize:'отклик, отклика, откликов' }}
+                                                           class="text-info">{{ vacancy.application_count|ru_pluralize:'отклик, отклика, откликов' }}
                                                         </a>
                                                     </p>
                                                 </div>

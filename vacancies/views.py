@@ -1,9 +1,8 @@
-from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.db.models import Count
 from django.db.models import Q
-from django.http import HttpResponseNotFound, HttpResponseServerError, Http404, HttpResponse
+from django.http import HttpResponseNotFound, HttpResponseServerError, Http404
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
@@ -228,7 +227,7 @@ def my_company_view(request):
 def my_vacancies_list_view(request):
     # список моих вакансий
     try:
-        company = Company.objects.get(owner_id=request.user.id).id
+        company_id = Company.objects.get(owner_id=request.user.id).id
     except Company.DoesNotExist:
         # если в обход меню на /mycompany/vacancies/
         if request.user.is_authenticated:
@@ -236,7 +235,7 @@ def my_vacancies_list_view(request):
         else:
             return redirect('login')
 
-    vacancies = Vacancy.objects.filter(company_id=company)
+    vacancies = Vacancy.objects.filter(company_id=company_id).annotate(application_count=Count('applications'))
 
     return render(request, 'vacancies/company/vacancy-list.html', {'vacancies': vacancies})
 
