@@ -98,7 +98,11 @@ class CompanyForm(forms.ModelForm):
 
 
 class VacancyForm(forms.ModelForm):
-    # TODO прикрутить валидацию skills
+    skills = forms.RegexField(
+        regex=r'^[а-яА-Яa-zA-Z0-9, ]*$',
+        error_messages={'invalid': 'Допускаются только буквы, цифры, запятые и пробелы'}
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['title'].help_text = 'Максимум 100 символов'
@@ -115,6 +119,21 @@ class VacancyForm(forms.ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'pb-1'
         self.helper.field_class = 'col-12'
+
+        self.helper.layout = Layout(
+            Row(
+                Column('title', css_class='form-group'),
+                Column('specialty', css_class='form-group'),
+                css_class='form-row',
+            ),
+            Row(
+                Column('salary_min', css_class='form-group'),
+                Column('salary_max', css_class='form-group'),
+                css_class='form-row',
+            ),
+            'skills',
+            'title',
+        )
 
     class Meta:
         model = Vacancy

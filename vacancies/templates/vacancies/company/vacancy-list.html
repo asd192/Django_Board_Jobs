@@ -16,7 +16,7 @@
                     <div class="card-body px-4 pb-4">
                         <section class="tab-pane fade show active">
 
-                            {% if vacancies|length == 0 %}
+                            {% if not vacancies %}
 
                                 <p class="alert alert-primary " role="alert">У вас еще нет вакансий. Хотите добавить
                                     новую?</p>
@@ -52,12 +52,12 @@
                                         </div>
                                     </div>
 
-                                    <a href="{% url 'my_vacancy_empty_form' %}"
-                                       class="btn btn-outline-info text-center mt-3">Добавить ещё</a>
-
                                 {% endfor %}
 
                             {% endif %}
+
+                            <a href="{% url 'my_vacancy_empty_form' %}"
+                               class="btn btn-outline-info text-center mt-3">Добавить ещё</a>
 
                         </section>
                     </div>

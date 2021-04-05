@@ -52,8 +52,8 @@ class MainView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(MainView, self).get_context_data(**kwargs)
-        context['specialties'] = Specialty.objects.annotate(count=Count('vacancies__specialty_id'))
-        context['companies'] = Company.objects.annotate(count=Count('vacancies__specialty_id'))
+        context['specialties'] = Specialty.objects.annotate(count=Count('vacancies__specialty_id'))[:8]
+        context['companies'] = Company.objects.annotate(count=Count('vacancies__specialty_id'))[:8]
         return context
 
 
