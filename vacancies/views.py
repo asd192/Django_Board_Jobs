@@ -2,17 +2,16 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.db.models import Count
 from django.db.models import Q
-from django.http import HttpResponseNotFound, HttpResponseServerError, Http404
+from django.http import Http404, HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.views.generic import CreateView, TemplateView, View
 from django.views.generic.list import ListView
 
-from conf.settings import MEDIA_COMPANY_IMAGE_DIR, MEDIA_USER_PHOTO_IMAGE_DIR
 from vacancies.forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
-from vacancies.forms import MyRegistrationForm, MyLoginForm, ProfileForm
-from vacancies.models import Application, Company, Specialty, Resume, Vacancy
+from vacancies.forms import MyLoginForm, MyRegistrationForm, ProfileForm
+from vacancies.models import Application, Company, Resume, Specialty, Vacancy
 
 
 #################################################
@@ -126,7 +125,6 @@ def vacancy_view(request, vacancy_id: int):
     application_sent = False
     user_in_application = Application.objects.filter(vacancy_id=vacancy_id).filter(user_id=request.user.id)
 
-    # FIXME не загружается фото
     if user_in_application:
         # если юзер уже отзывался на эту вакансию
         application_sent = True
@@ -135,8 +133,6 @@ def vacancy_view(request, vacancy_id: int):
             vacancy_send_form = ApplicationForm(request.POST, request.FILES)
             if vacancy_send_form.is_valid():
                 vacancy_data = vacancy_send_form.cleaned_data
-                vacancy_data['written_photo'] = f"{MEDIA_USER_PHOTO_IMAGE_DIR}/{vacancy_data['written_photo']}"
-                print(vacancy_data)
                 user_in_application.update(**vacancy_data)
 
                 return redirect('resume_send', vacancy_id=vacancy.id)
@@ -144,7 +140,7 @@ def vacancy_view(request, vacancy_id: int):
         # пустая форма отклика
         vacancy_send_form = ApplicationForm()
         if request.method == 'POST':
-            vacancy_send_form = ApplicationForm(request.POST)
+            vacancy_send_form = ApplicationForm(request.POST, request.FILES)
             if vacancy_send_form.is_valid():
                 vacancy_send_form_data = vacancy_send_form.cleaned_data
                 vacancy_send_form_data['user_id'] = request.user.id
@@ -221,7 +217,6 @@ def my_company_view(request):
         company_form = CompanyForm(request.POST, request.FILES)
         if company_form.is_valid():
             company_data = company_form.cleaned_data
-            company_data['logo'] = f"{MEDIA_COMPANY_IMAGE_DIR}/{company_data['logo']}"
             Company.objects.filter(owner_id=request.user.id).update(**company_data)
             message = 'success'
 

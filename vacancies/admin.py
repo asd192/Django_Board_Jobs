@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Application, Company, Specialty, Vacancy, Resume
+from .models import Application, Company, Resume, Specialty, Vacancy
 
 
 @admin.register(Company)

@@ -2,14 +2,13 @@ from django.contrib.auth.models import User
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
-from conf.settings import MEDIA_COMPANY_IMAGE_DIR, MEDIA_USER_PHOTO_IMAGE_DIR, MEDIA_SPECIALITY_IMAGE_DIR
+from conf.settings import MEDIA_COMPANY_IMAGE_DIR, MEDIA_SPECIALITY_IMAGE_DIR, MEDIA_USER_PHOTO_IMAGE_DIR
 
 
 class Specialty(models.Model):
     code = models.CharField("код", primary_key=True, max_length=30)
     title = models.CharField("название", max_length=100)
-    picture = models.ImageField("изображение", upload_to=MEDIA_SPECIALITY_IMAGE_DIR,
-                                default=f'{MEDIA_SPECIALITY_IMAGE_DIR}/100x60.gif')
+    picture = models.ImageField("изображение", upload_to=MEDIA_SPECIALITY_IMAGE_DIR, default='100x60.gif')
 
     class Meta:
         verbose_name = "специализация"
@@ -32,8 +31,7 @@ class Company(models.Model):
     description = models.TextField("информация о компании", max_length=5000)
     employee_count = models.CharField("количество сотрудников", max_length=10, choices=CHOICES_EMPLOYEE_COUNT)
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="owner_user", verbose_name="owner_id")
-    logo = models.ImageField("логотип", upload_to=MEDIA_COMPANY_IMAGE_DIR,
-                             default=f'{MEDIA_COMPANY_IMAGE_DIR}/100x60.gif')
+    logo = models.ImageField("логотип", upload_to=MEDIA_COMPANY_IMAGE_DIR, default='100x60.gif')
 
     class Meta:
         verbose_name = "компания"

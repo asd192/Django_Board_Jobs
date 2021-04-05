@@ -1,10 +1,10 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Column, HTML, Layout, Row, Submit
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UsernameField, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField
 from django.contrib.auth.models import User
 
-from vacancies.models import Application, Company, Vacancy, Resume
+from vacancies.models import Application, Company, Resume, Vacancy
 
 
 class MyRegistrationForm(UserCreationForm):
@@ -100,7 +100,7 @@ class CompanyForm(forms.ModelForm):
 class VacancyForm(forms.ModelForm):
     skills = forms.RegexField(
         regex=r'^[а-яА-Яa-zA-Z0-9, ]*$',
-        error_messages={'invalid': 'Допускаются только буквы, цифры, запятые и пробелы'}
+        error_messages={'invalid': 'Допускаются только буквы, цифры, запятые и пробелы'},
     )
 
     def __init__(self, *args, **kwargs):

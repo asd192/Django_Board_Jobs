@@ -138,4 +138,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MEDIA_COMPANY_IMAGE_DIR = 'company_images'
 MEDIA_SPECIALITY_IMAGE_DIR = 'speciality_images'
-MEDIA_USER_PHOTO_IMAGE_DIR = 'user_images/photo_application'
+MEDIA_USER_PHOTO_IMAGE_DIR = 'user_photo'

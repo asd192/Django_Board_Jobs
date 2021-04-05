@@ -20,14 +20,13 @@ from django.contrib import admin
 from django.contrib.auth.views import LogoutView
 from django.urls import include, path
 
-from vacancies.views import Login, Registration, user_profile_view
-from vacancies.views import CompanyCardView, MainView, vacancy_view, VacanciesView
+from vacancies.views import CompanyCardView, MainView, user_profile_view, VacanciesView, vacancy_view
 from vacancies.views import custom_handler404, custom_handler500
+from vacancies.views import Login, Registration
 from vacancies.views import my_company_empty_view, my_company_view, MyCompanyLetsstarView
-from vacancies.views import my_resume_empty_view, my_resume_view, my_resume_letsstart_view
-from vacancies.views import my_vacancy_empty_view, my_vacancy_view, my_vacancies_list_view
-from vacancies.views import VacanciesSpecialtyView, ResumeSendingView
-from vacancies.views import SearchView
+from vacancies.views import my_resume_empty_view, my_resume_letsstart_view, my_resume_view
+from vacancies.views import my_vacancies_list_view, my_vacancy_empty_view, my_vacancy_view
+from vacancies.views import ResumeSendingView, SearchView, VacanciesSpecialtyView
 
 handler404 = custom_handler404
 handler500 = custom_handler500

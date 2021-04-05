@@ -1,5 +1,8 @@
 [flake8]
 max-line-length = 120
-exclude = .git,__pycache__,migrations, manage.py
-max-cognitive-complexity = 15
-max-complexity = 15
+exclude = .git,__pycache__,migrations,manage.py
+max-cognitive-complexity = 10
+max-complexity = 10
+
+application-import-names = conf, vacancies
+import-order-style = google
