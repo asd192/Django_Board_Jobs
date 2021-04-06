@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.db.models import Count
@@ -9,6 +10,7 @@ from django.shortcuts import render
 from django.views.generic import CreateView, TemplateView, View
 from django.views.generic.list import ListView
 
+from conf.settings import MEDIA_COMPANY_IMAGE_DIR
 from vacancies.forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
 from vacancies.forms import MyLoginForm, MyRegistrationForm, ProfileForm
 from vacancies.models import Application, Company, Resume, Specialty, Vacancy
@@ -27,22 +29,23 @@ class Login(LoginView):
     form_class = MyLoginForm
     redirect_authenticated_user = True
     template_name = 'vacancies/auth_reg/login.html'
-    extra_context = {'title': 'Абра-Кадабра'}
 
 
 def user_profile_view(request):
     user = get_object_or_404(User, id=request.user.id)
 
-    message = ''
     profile_form = ProfileForm(instance=user)
     if request.method == 'POST':
         profile_form = ProfileForm(request.POST)
         if profile_form.is_valid():
             vacancy_data = profile_form.cleaned_data
             User.objects.filter(id=request.user.id).update(**vacancy_data)
-            message = 'success'
+            messages.success(request, 'Информация о профиле обновлена')
+            return redirect(user_profile_view)
+        else:
+            messages.error(request, 'Проверьте правильность заполнения формы')
 
-    return render(request, 'vacancies/profile.html', {'form': profile_form, 'message': message})
+    return render(request, 'vacancies/profile.html', {'form': profile_form})
 
 
 class MainView(TemplateView):
@@ -129,8 +132,10 @@ def vacancy_view(request, vacancy_id: int):
         # если юзер уже отзывался на эту вакансию
         application_sent = True
         vacancy_send_form = ApplicationForm(instance=user_in_application.first())
+
         if request.method == 'POST':
             vacancy_send_form = ApplicationForm(request.POST, request.FILES)
+
             if vacancy_send_form.is_valid():
                 vacancy_data = vacancy_send_form.cleaned_data
                 user_in_application.update(**vacancy_data)
@@ -141,6 +146,7 @@ def vacancy_view(request, vacancy_id: int):
         vacancy_send_form = ApplicationForm()
         if request.method == 'POST':
             vacancy_send_form = ApplicationForm(request.POST, request.FILES)
+
             if vacancy_send_form.is_valid():
                 vacancy_send_form_data = vacancy_send_form.cleaned_data
                 vacancy_send_form_data['user_id'] = request.user.id
@@ -184,19 +190,22 @@ def my_company_empty_view(request):
     # если компания уже создана
     company_exists = Company.objects.filter(owner_id=request.user.id).values()
     if company_exists:
-        return redirect(my_company_view)
+        return redirect('my_company_form')
 
-    message = ''
     company_form = CompanyForm()
     if request.method == 'POST':
         company_form = CompanyForm(request.POST, request.FILES)
+
         if company_form.is_valid():
             company_form_update = company_form.save(commit=False)
             company_form_update.owner_id = request.user.id
             company_form.save()
-            message = 'success'
+            messages.success(request, 'Компания успешно создана')
+            return redirect('my_company_letsstart')
+        else:
+            messages.error(request, 'Проверьте правильность заполнения формы')
 
-    return render(request, 'vacancies/company/company-edit.html', {'form': company_form, 'message': message})
+    return render(request, 'vacancies/company/company-edit.html', {'form': company_form})
 
 
 def my_company_view(request):
@@ -212,19 +221,23 @@ def my_company_view(request):
 
     company_form = CompanyForm(instance=company)
 
-    message = ''
     if request.method == 'POST':
         company_form = CompanyForm(request.POST, request.FILES)
+
         if company_form.is_valid():
             company_data = company_form.cleaned_data
+            company_data['logo'] = f"{MEDIA_COMPANY_IMAGE_DIR}/{company_data['logo']}"
             Company.objects.filter(owner_id=request.user.id).update(**company_data)
-            message = 'success'
+            messages.success(request, 'Информация о компании успешно обновлена')
+            return redirect('my_company_letsstart')
+        else:
+            messages.error(request, 'Проверьте правильность заполнения формы')
 
-    return render(request, 'vacancies/company/company-edit.html', {'form': company_form, 'message': message})
+    return render(request, 'vacancies/company/company-edit.html', {'form': company_form})
 
 
 def my_vacancies_list_view(request):
-    # список моих вакансий
+    # список вакансий компании
     try:
         company_id = Company.objects.get(owner_id=request.user.id).id
     except Company.DoesNotExist:
@@ -240,19 +253,22 @@ def my_vacancies_list_view(request):
 
 
 def my_vacancy_empty_view(request):
-    # пустая форма вакансий
+    # пустая форма вакансии
     vacancy_empty_form = VacancyForm()
 
-    message = ''
     if request.method == 'POST':
         vacancy_empty_form = VacancyForm(request.POST)
+
         if vacancy_empty_form.is_valid():
             form_data = vacancy_empty_form.save(commit=False)
             form_data.company_id = Company.objects.get(owner_id=request.user.id).id
             form_data.save()
-            message = 'success'
+            messages.success(request, 'Вакансия успешно создана')
+            return redirect('my_vacancies')
+        else:
+            messages.error(request, 'Проверьте правильность заполнения формы')
 
-    return render(request, 'vacancies/company/vacancy-edit.html', {'form': vacancy_empty_form, 'message': message})
+    return render(request, 'vacancies/company/vacancy-edit.html', {'form': vacancy_empty_form})
 
 
 def my_vacancy_view(request, vacancy_id: int):
@@ -260,18 +276,20 @@ def my_vacancy_view(request, vacancy_id: int):
     vacancy = get_object_or_404(Vacancy, id=vacancy_id)
     applications = Application.objects.filter(vacancy_id=vacancy_id)
 
-    message = ''
     my_vacancy_form = VacancyForm(instance=vacancy)
     if request.method == 'POST':
         my_vacancy_form = VacancyForm(request.POST)
+
         if my_vacancy_form.is_valid():
             company_data = my_vacancy_form.cleaned_data
             Vacancy.objects.filter(id=vacancy_id).update(**company_data)
-            message = 'success'
+            messages.success(request, 'Информация о вакансии успешно обновлена')
+            return redirect('my_vacancies')
+        else:
+            messages.error(request, 'Проверьте правильность заполнения формы')
 
     context = {
         'form': my_vacancy_form,
-        'message': message,
         'applications': applications,
     }
 
@@ -294,19 +312,22 @@ def my_resume_empty_view(request):
     # если резюме уже создано
     resume_exists = Resume.objects.filter(user_id=request.user.id).values()
     if resume_exists:
-        return redirect(my_resume_view)
+        return redirect('my_resume_form')
 
-    message = ''
     resume_form = ResumeForm()
     if request.method == 'POST':
         resume_form = ResumeForm(request.POST, request.FILES)
+
         if resume_form.is_valid():
             resume_form_update = resume_form.save(commit=False)
             resume_form_update.user_id = request.user.id
             resume_form.save()
-            message = 'success'
+            messages.success(request, 'Резюме успешно создано')
+            return redirect('my_resume_form')
+        else:
+            messages.error(request, 'Проверьте правильность заполнения формы')
 
-    return render(request, 'vacancies/resume/resume-edit.html', {'form': resume_form, 'message': message})
+    return render(request, 'vacancies/resume/resume-edit.html', {'form': resume_form})
 
 
 def my_resume_view(request):
@@ -316,21 +337,24 @@ def my_resume_view(request):
     except Resume.DoesNotExist:
         # если в обход меню на myresume/
         if request.user.is_authenticated:
-            return redirect(my_resume_letsstart_view)
+            return redirect('my_resume_letsstart')
         else:
             return redirect('login')
 
     resume_form = ResumeForm(instance=resume)
 
-    message = ''
     if request.method == 'POST':
         resume_form = ResumeForm(request.POST)
+
         if resume_form.is_valid():
             resume_data = resume_form.cleaned_data
             Resume.objects.filter(user_id=request.user.id).update(**resume_data)
-            message = 'success'
+            messages.success(request, 'Резюме успешно обновлено')
+            return redirect('my_resume_form')
+        else:
+            messages.error(request, 'Проверьте правильность заполнения формы')
 
-    return render(request, 'vacancies/resume/resume-edit.html', {'form': resume_form, 'message': message})
+    return render(request, 'vacancies/resume/resume-edit.html', {'form': resume_form})
 
 
 def custom_handler404(request, exception):

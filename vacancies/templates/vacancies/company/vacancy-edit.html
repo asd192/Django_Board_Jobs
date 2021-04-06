@@ -16,9 +16,7 @@
                         <section>
                             <h2 class="h4 pt-2 pb-3">Добавить/Редактировать вакансию</h2>
 
-                            {% if message == 'success' %}
-                                <p class="alert alert-info" role="alert">Вакансия обновлена</p>
-                            {% endif %}
+                            {% include 'vacancies/messages.html' %}
 
                             {% load crispy_forms_tags %}
                             {% crispy form "bootstrap4" %}

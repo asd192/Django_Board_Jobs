@@ -100,17 +100,17 @@ class CompanyForm(forms.ModelForm):
 class VacancyForm(forms.ModelForm):
     skills = forms.RegexField(
         regex=r'^[а-яА-Яa-zA-Z0-9, ]*$',
-        error_messages={'invalid': 'Допускаются только буквы, цифры, запятые и пробелы'},
+        error_messages={'invalid': 'Допускаются только БУКВЫ, ЦИФРЫ, ЗАПЯТЫЕ и ПРОБЕЛЫ'},
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['title'].help_text = 'Максимум 100 символов'
         self.fields['skills'].help_text = 'Укажите список через запятую. Пример: Swift, CoreData, Git, ООП'
-        self.fields['description'].help_text = 'Не более 10 000 символов'
         self.fields['salary_min'].help_text = 'Минимальная оплата'
         self.fields['salary_max'].button_text = 'Максимальная оплата'
         self.fields['specialty'].button_text = 'Выберите значение'
+        self.fields['description'].help_text = 'Не более 10 000 символов'
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -132,7 +132,7 @@ class VacancyForm(forms.ModelForm):
                 css_class='form-row',
             ),
             'skills',
-            'title',
+            'description',
         )
 
     class Meta:

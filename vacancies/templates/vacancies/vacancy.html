@@ -16,6 +16,17 @@
             <div class="col-12 col-lg-8">
                 <section class="pl-3">
 
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li class="{{ message.tags }}">
+                                    {{ message|safe }}
+                                    <a href="#" class="close">✖</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
                     {% if application_sent %}
 
                         <p class="alert alert-success" role="alert">
@@ -36,7 +47,8 @@
                         <p class="salary m-0 pl-3 font-italic">{{ vacancy.salary_min }} – {{ vacancy.salary_max }} Р</p>
                     </div>
                     <p class="mt-2">
-                        <ul class="ul_skills">{{ vacancy.skills|list_li|safe|escape }}</ul></p>
+                    <ul class="ul_skills">{{ vacancy.skills|list_li|safe|escape }}</ul>
+                    </p>
                     <p class="text-muted mb-4">{{ company.name|title }}
                         ({{ vacancy.company.employee_count|ru_pluralize:'человек, человека, человек' }}),
                         {{ vacancy.company.location }} или удалённо</p>

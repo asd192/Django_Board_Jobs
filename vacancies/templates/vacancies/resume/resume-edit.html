@@ -9,9 +9,7 @@
             <div class="card-body px-3 pb-4">
                 <h1 class="h4 pt-2 pb-3">Мое резюме</h1>
 
-                {% if message == 'success' %}
-                    <p class="alert alert-info" role="alert">Резюме обновлено</p>
-                {% endif %}
+                {% include 'vacancies/messages.html' %}
 
                 {% load crispy_forms_tags %}
                 {% crispy form "bootstrap4" %}

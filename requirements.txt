@@ -15,13 +15,13 @@ eradicate==2.0.0
 flake8==3.8.4
 flake8-blind-except==0.2.0
 flake8-builtins==1.5.3
-flake8-cognitive-complexity==0.1.0
 flake8-commas==2.0.0
 flake8-comprehensions==3.3.1
 flake8-django==1.1.1
 flake8-eradicate==1.0.0
 flake8-expression-complexity==0.0.9
 flake8-functions==0.0.5
+flake8-import-order==0.18.1
 flake8-logging-format==0.6.0
 flake8-polyfill==1.0.2
 flake8-print==4.0.0

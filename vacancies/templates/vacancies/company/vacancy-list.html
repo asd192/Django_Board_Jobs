@@ -29,6 +29,8 @@
 
                                 <h2 class="h4 pt-2 pb-3">Вакансии</h2>
 
+                                {% include 'vacancies/messages.html' %}
+
                                 {% for vacancy in vacancies %}
 
                                     <div class="card mt-3">
@@ -54,10 +56,11 @@
 
                                 {% endfor %}
 
+                                <a href="{% url 'my_vacancy_empty_form' %}"
+                                   class="btn btn-outline-info text-center mt-3">Добавить ещё</a>
+
                             {% endif %}
 
-                            <a href="{% url 'my_vacancy_empty_form' %}"
-                               class="btn btn-outline-info text-center mt-3">Добавить ещё</a>
 
                         </section>
                     </div>
