@@ -202,7 +202,11 @@ class ResumeForm(forms.ModelForm):
         fields = ("name", "surname", "status", "salary", "specialty", "grade", "education", "experience", "portfolio")
 
 
-class ProfileForm(forms.ModelForm):
+class UserProfileForm(forms.ModelForm):
+    email = forms.EmailField(min_length=5, max_length=50, disabled=True)
+    first_name = forms.CharField(min_length=2, max_length=15)
+    last_name = forms.CharField(min_length=2, max_length=25)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -225,4 +229,4 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ("first_name", "last_name", "email")
+        fields = ("email", "first_name", "last_name")

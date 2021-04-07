@@ -42,7 +42,7 @@
                                     {{ user|upper }}
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right mt-3">
-                                    <a href="{% url 'user_profile' %}" class="dropdown-item py-2">Профиль</a>
+                                    <a href="{% url 'user_profile' request.user.id %}" class="dropdown-item py-2">Профиль</a>
                                     <a href="{% url 'my_resume_form' %}" class="dropdown-item py-2">Резюме</a>
                                     <a href="{% url 'my_company_form' %}" class="dropdown-item py-2">Компания</a>
                                     <a href="{% url 'logout' %}" class="dropdown-item py-2">Выйти</a>
@@ -73,7 +73,7 @@
             Контакты: <a href="mailto:help@pochta.kuku" class="text-success">help@pochta.kuku</a>
         </div>
         <div>
-            <a href="#top" class="text-success">Copyright 2021</a>
+            <a href="#top">Copyright {% now "Y" %}</a>
         </div>
     </div>
 </footer>

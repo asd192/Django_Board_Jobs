@@ -26,6 +26,12 @@
                         </section>
                         <!-- END Tab -->
                     </div>
+
+                    {% if form.name.value %}
+                        <p class="text-center"><a href="{% url 'my_company_delete' %}" class="text-secondary">Удалить
+                            компанию</a></p>
+                    {% endif %}
+
                 </div>
             </div>
         </div>

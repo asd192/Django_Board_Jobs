@@ -207,3 +207,31 @@ a:not([href]):not([tabindex]):active {
     background-color: #28a745;
     border-color: #28a745;
 }
+
+.btn-primary {
+    color: #fff;
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+    color: #fff;
+    background-color: #28a745;
+}
+
+a {
+    color: #454a46;
+}
+a:hover {
+    color: #28a745;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+    background-color: #28a745;
+}

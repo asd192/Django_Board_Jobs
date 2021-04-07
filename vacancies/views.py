@@ -7,12 +7,13 @@ from django.http import Http404, HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
-from django.views.generic import CreateView, TemplateView, View
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, TemplateView, UpdateView, View
 from django.views.generic.list import ListView
 
 from conf.settings import MEDIA_COMPANY_IMAGE_DIR
 from vacancies.forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
-from vacancies.forms import MyLoginForm, MyRegistrationForm, ProfileForm
+from vacancies.forms import MyLoginForm, MyRegistrationForm, UserProfileForm
 from vacancies.models import Application, Company, Resume, Specialty, Vacancy
 
 
@@ -31,21 +32,21 @@ class Login(LoginView):
     template_name = 'vacancies/auth_reg/login.html'
 
 
-def user_profile_view(request):
-    user = get_object_or_404(User, id=request.user.id)
+class UserProfile(UpdateView):
+    template_name = 'vacancies/profile.html'
+    model = User
+    form_class = UserProfileForm
 
-    profile_form = ProfileForm(instance=user)
-    if request.method == 'POST':
-        profile_form = ProfileForm(request.POST)
-        if profile_form.is_valid():
-            vacancy_data = profile_form.cleaned_data
-            User.objects.filter(id=request.user.id).update(**vacancy_data)
-            messages.success(request, 'Информация о профиле обновлена')
-            return redirect(user_profile_view)
-        else:
-            messages.error(request, 'Проверьте правильность заполнения формы')
+    def get_success_url(self):
+        return reverse_lazy('user_profile', kwargs={'pk': self.object.pk})
 
-    return render(request, 'vacancies/profile.html', {'form': profile_form})
+    def form_valid(self, form):
+        messages.success(self.request, 'Информация о профиле обновлена')
+        return super(UserProfile, self).form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Проверьте правильность заполнения формы')
+        return super(UserProfile, self).form_invalid(form)
 
 
 class MainView(TemplateView):
@@ -236,6 +237,16 @@ def my_company_view(request):
     return render(request, 'vacancies/company/company-edit.html', {'form': company_form})
 
 
+def my_company_delete_view(request):
+    try:
+        Company.objects.get(owner_id=request.user.id).delete()
+        messages.success(request, 'Компания успешно удалена')
+    except Company.DoesNotExist:
+        messages.error(request, 'Не получилось удалить компанию, что-то пошло не так. Просьба сообщить администратору.')
+
+    return redirect('my_company_letsstart')
+
+
 def my_vacancies_list_view(request):
     # список вакансий компании
     try:
@@ -291,9 +302,20 @@ def my_vacancy_view(request, vacancy_id: int):
     context = {
         'form': my_vacancy_form,
         'applications': applications,
+        'pk': vacancy.pk,
     }
 
     return render(request, 'vacancies/company/vacancy-edit.html', context=context)
+
+
+def my_vacancy_delete_view(request, vacancy_id):
+    try:
+        Vacancy.objects.get(id=vacancy_id).delete()
+        messages.success(request, 'Вакансия успешно удалена')
+    except Vacancy.DoesNotExist:
+        messages.error(request, 'Не получилось удалить вакансию, что-то пошло не так. Просьба сообщить администратору.')
+
+    return redirect('my_vacancies')
 
 
 #################################################
@@ -355,6 +377,17 @@ def my_resume_view(request):
             messages.error(request, 'Проверьте правильность заполнения формы')
 
     return render(request, 'vacancies/resume/resume-edit.html', {'form': resume_form})
+
+
+def my_resume_delete(request):
+    try:
+        Resume.objects.get(user_id=request.user.id).delete()
+        messages.success(request, 'Резюме успешно удалено')
+    except Resume.DoesNotExist:
+        messages.error(request,
+                       'Не получилось удалить ваше резюме, что-то пошло не так. Просьба сообщить администратору.')
+
+    return redirect('my_resume_letsstart')
 
 
 def custom_handler404(request, exception):

@@ -30,8 +30,8 @@ class Company(models.Model):
     location = models.CharField("город", max_length=25)
     description = models.TextField("информация о компании", max_length=5000)
     employee_count = models.CharField("количество сотрудников", max_length=10, choices=CHOICES_EMPLOYEE_COUNT)
-    owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="owner_user", verbose_name="owner_id")
     logo = models.ImageField("логотип", upload_to=MEDIA_COMPANY_IMAGE_DIR, default='100x60.gif')
+    owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="owner_user", verbose_name="owner_id")
 
     class Meta:
         verbose_name = "компания"

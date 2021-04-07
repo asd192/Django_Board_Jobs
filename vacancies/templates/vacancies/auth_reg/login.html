@@ -12,7 +12,7 @@
                 {% load crispy_forms_tags %}
                 {% crispy form "bootstrap4" %}
 
-                <div class="mt-4 text-center"><p>Нет аккаунта? <a href="/register">Зарегистрируйтесь!</a></p></div>
+                <div class="mt-4 text-center"><p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрируйтесь!</a></p></div>
             </div>
         </div>
     </main>

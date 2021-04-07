@@ -4,7 +4,7 @@
 
 {% block container %}
 
-    <main class="container mt-3 pb-5">
+    <main class="container mt-3 pb-5" xmlns="http://www.w3.org/1999/html">
         <section class="col-12 col-lg-6 offset-lg-3 mt-5 card">
             <div class="card-body px-3 pb-4">
                 <h1 class="h4 pt-2 pb-3">Мое резюме</h1>
@@ -15,6 +15,11 @@
                 {% crispy form "bootstrap4" %}
 
             </div>
+
+            {% if form.name.value %}
+            <p class="text-center"><a href="{% url 'my_resume_delete' %}" class="text-secondary">Удалить моё резюме</a></p>
+            {% endif %}
+
         </section>
     </main>
 
