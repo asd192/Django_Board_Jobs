@@ -25,11 +25,23 @@ class Registration(CreateView):
     success_url = '/login'
     template_name = 'vacancies/auth_reg/register.html'
 
+    def form_valid(self, form):
+        messages.success(self.request, 'Успешная регистрация. Заходите')
+        return super(Registration, self).form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Регистрация не удалась. Проверьте правильность заполнения полей')
+        return super(Registration, self).form_invalid(form)
+
 
 class Login(LoginView):
     form_class = MyLoginForm
     redirect_authenticated_user = True
     template_name = 'vacancies/auth_reg/login.html'
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Не удалось войти. Проверьте правильность заполнения полей')
+        return super(Login, self).form_invalid(form)
 
 
 class UserProfile(UpdateView):

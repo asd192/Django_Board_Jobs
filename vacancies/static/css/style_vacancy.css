@@ -18,6 +18,10 @@
     color: #212529;
 }
 
+.h2-name a:hover {
+    color: #212529;
+}
+
 .category:hover {
     background: linear-gradient(to top, #fffde8, #ecfffb);
 }
@@ -234,4 +238,12 @@ a:hover {
 
 .dropdown-item.active, .dropdown-item:active {
     background-color: #28a745;
+}
+
+.auth {
+    text-decoration: underline;
+}
+
+.alert {
+    text-align: center;
 }

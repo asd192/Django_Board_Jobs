@@ -6,13 +6,18 @@
 
     <main class="container mt-3">
         <h1 class="h1 text-center py-4"><strong>Вход</strong></h1>
+
+
         <div class="row">
             <div class="col-6 offset-md-3">
+
+                {% include 'vacancies/messages.html' %}
 
                 {% load crispy_forms_tags %}
                 {% crispy form "bootstrap4" %}
 
-                <div class="mt-4 text-center"><p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрируйтесь!</a></p></div>
+                <div class="mt-4 text-center"><p>Нет аккаунта? <a href="{% url 'register' %}" class="auth">Зарегистрируйтесь!</a>
+                </p></div>
             </div>
         </div>
     </main>

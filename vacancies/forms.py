@@ -11,10 +11,12 @@ class MyRegistrationForm(UserCreationForm):
     username = UsernameField(label='Логин', min_length=3, max_length=15)
     first_name = forms.CharField(label='Имя', min_length=2, max_length=20)
     last_name = forms.CharField(label='Фамилия', min_length=3, max_length=30)
+    email = forms.EmailField(label='Email', min_length=6, max_length=50)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['username'].help_text = 'Не менее 3-ёх символов'
+        self.fields['email'].help_text = 'Ваш электронный почтовый ящик'
         self.fields['first_name'].help_text = 'Не менее 2-ух букв'
         self.fields['last_name'].help_text = 'Не менее 3-ёх букв'
         self.fields[
@@ -30,7 +32,7 @@ class MyRegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ("username", "first_name", "last_name", "password1", "password2")
+        fields = ("username", "email", "first_name", "last_name", "password1", "password2")
 
 
 class MyLoginForm(AuthenticationForm):
