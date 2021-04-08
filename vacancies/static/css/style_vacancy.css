@@ -226,18 +226,18 @@ a:not([href]):not([tabindex]):active {
 
 .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
     color: #fff;
-    background-color: #28a745;
+    background-color: #17a2b8;
 }
 
 a {
     color: #454a46;
 }
 a:hover {
-    color: #28a745;
+    color: #17a2b8;
 }
 
 .dropdown-item.active, .dropdown-item:active {
-    background-color: #28a745;
+    background-color: #17a2b8;
 }
 
 .auth {

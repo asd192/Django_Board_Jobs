@@ -135,7 +135,6 @@ def vacancy_view(request, vacancy_id: int):
     """Страница вакансии"""
     try:
         vacancy = Vacancy.objects.select_related('company').get(id=vacancy_id)
-        company = vacancy.company
     except (Vacancy.DoesNotExist, Company.DoesNotExist):
         raise Http404
 
@@ -153,8 +152,11 @@ def vacancy_view(request, vacancy_id: int):
             if vacancy_send_form.is_valid():
                 vacancy_data = vacancy_send_form.cleaned_data
                 user_in_application.update(**vacancy_data)
-
+                messages.success(request, 'Отклик обновлен')
                 return redirect('resume_send', vacancy_id=vacancy.id)
+            else:
+                messages.error(request, 'Проверьте правильность заполнения формы')
+
     else:
         # пустая форма отклика
         vacancy_send_form = ApplicationForm()
@@ -166,13 +168,14 @@ def vacancy_view(request, vacancy_id: int):
                 vacancy_send_form_data['user_id'] = request.user.id
                 vacancy_send_form_data['vacancy_id'] = vacancy.id
                 Application(**vacancy_send_form_data).save()
-
+                messages.success(request, 'Отклик успешно отправлен')
                 return redirect('resume_send', vacancy_id=vacancy.id)
+            else:
+                messages.error(request, 'Проверьте правильность заполнения формы')
 
     context = {
         'form': vacancy_send_form,
         'vacancy': vacancy,
-        'company': company,
         'application_sent': application_sent,
     }
 

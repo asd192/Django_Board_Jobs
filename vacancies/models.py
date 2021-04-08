@@ -26,12 +26,17 @@ class Company(models.Model):
         ('4', '500-1000'),
         ('5', '> 1000'),
     )
+
     name = models.CharField("название", max_length=100)
     location = models.CharField("город", max_length=25)
     description = models.TextField("информация о компании", max_length=5000)
     employee_count = models.CharField("количество сотрудников", max_length=10, choices=CHOICES_EMPLOYEE_COUNT)
     logo = models.ImageField("логотип", upload_to=MEDIA_COMPANY_IMAGE_DIR, default='100x60.gif')
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="owner_user", verbose_name="owner_id")
+
+    def employee_count_verbose(self):
+        """Значение списка. Использование в шаблоне -> {{ model.employee_count_verbose }}"""
+        return dict(Company.CHOICES_EMPLOYEE_COUNT)[self.employee_count]
 
     class Meta:
         verbose_name = "компания"
@@ -67,7 +72,7 @@ class Application(models.Model):
     written_phone = PhoneNumberField("номер телефона", region='RU')
     written_cover_letter = models.TextField("сопроводительное письмо", max_length=10000)
     written_photo = models.ImageField(
-        "фотография", upload_to=MEDIA_USER_PHOTO_IMAGE_DIR, blank=True,
+        "фотография", upload_to=MEDIA_USER_PHOTO_IMAGE_DIR, blank=True, default=None,
     )
     vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name="applications")
     user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="applications", null=True)
