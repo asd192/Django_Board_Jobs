@@ -45,6 +45,7 @@ class Login(LoginView):
 
 
 class UserProfile(UpdateView):
+    """Профиль пользователя"""
     template_name = 'vacancies/profile.html'
     model = User
     form_class = UserProfileForm
@@ -62,7 +63,7 @@ class UserProfile(UpdateView):
 
 
 class MainView(TemplateView):
-    # главная
+    """Главная"""
     template_name = 'vacancies/main.html'
 
     def get_context_data(self, **kwargs):
@@ -73,7 +74,7 @@ class MainView(TemplateView):
 
 
 class VacanciesView(ListView):
-    # все вакансии
+    """Все вакансии"""
     template_name = 'vacancies/vacancies.html'
     model = Vacancy
     context_object_name = 'vacancies'
@@ -89,7 +90,7 @@ class VacanciesView(ListView):
 
 
 class VacanciesSpecialtyView(VacanciesView):
-    # вакансии по специализации
+    """Вакансии по специализации"""
     def get_queryset(self, **kwargs):
         return self.model.objects.select_related('company').filter(specialty_id=self.kwargs['specialty'])
 
@@ -101,7 +102,7 @@ class VacanciesSpecialtyView(VacanciesView):
 
 
 class SearchView(VacanciesView):
-    # поиск вакансий
+    """Поиск вакансий(строка поиска)"""
     template_name = 'vacancies/search.html'
 
     def get_queryset(self):
@@ -118,7 +119,7 @@ class SearchView(VacanciesView):
 
 
 class CompanyCardView(VacanciesView):
-    # карточка компании
+    """Карточка компании"""
     template_name = 'vacancies/company/company.html'
 
     def get_queryset(self, **kwargs):
@@ -131,7 +132,7 @@ class CompanyCardView(VacanciesView):
 
 
 def vacancy_view(request, vacancy_id: int):
-    # страница вакансии
+    """Страница вакансии"""
     try:
         vacancy = Vacancy.objects.select_related('company').get(id=vacancy_id)
         company = vacancy.company
@@ -142,7 +143,7 @@ def vacancy_view(request, vacancy_id: int):
     user_in_application = Application.objects.filter(vacancy_id=vacancy_id).filter(user_id=request.user.id)
 
     if user_in_application:
-        # если юзер уже отзывался на эту вакансию
+        # если уже отзывались на эту вакансию
         application_sent = True
         vacancy_send_form = ApplicationForm(instance=user_in_application.first())
 
@@ -179,6 +180,7 @@ def vacancy_view(request, vacancy_id: int):
 
 
 class ResumeSendingView(TemplateView):
+    """Подтверждение отправленного резюме"""
     template_name = 'vacancies/sent.html'
 
 
@@ -186,6 +188,7 @@ class ResumeSendingView(TemplateView):
 #                   Компания                    #
 #################################################
 class MyCompanyLetsstarView(View):
+    """Предложение создать компанию"""
     template_name = 'vacancies/company/company-create.html'
 
     def get(self, request, *args, **kwargs):
@@ -196,7 +199,7 @@ class MyCompanyLetsstarView(View):
 
 
 def my_company_empty_view(request):
-    # пустая форма компании
+    """Пустая форма компании"""
     if not request.user.is_authenticated:
         return redirect('login')
 
@@ -222,7 +225,7 @@ def my_company_empty_view(request):
 
 
 def my_company_view(request):
-    # заполненная форма компании
+    """Заполненная форма компании"""
     try:
         company = Company.objects.get(owner_id=request.user.id)
     except Company.DoesNotExist:
@@ -250,6 +253,7 @@ def my_company_view(request):
 
 
 def my_company_delete_view(request):
+    """удаление моей компании"""
     try:
         Company.objects.get(owner_id=request.user.id).delete()
         messages.success(request, 'Компания успешно удалена')
@@ -260,7 +264,7 @@ def my_company_delete_view(request):
 
 
 def my_vacancies_list_view(request):
-    # список вакансий компании
+    """Список вакансий компании"""
     try:
         company_id = Company.objects.get(owner_id=request.user.id).id
     except Company.DoesNotExist:
@@ -276,7 +280,7 @@ def my_vacancies_list_view(request):
 
 
 def my_vacancy_empty_view(request):
-    # пустая форма вакансии
+    """Пустая форма вакансии"""
     vacancy_empty_form = VacancyForm()
 
     if request.method == 'POST':
@@ -295,7 +299,7 @@ def my_vacancy_empty_view(request):
 
 
 def my_vacancy_view(request, vacancy_id: int):
-    # заполненная форма вакансий
+    """Заполненная форма вакансии"""
     vacancy = get_object_or_404(Vacancy, id=vacancy_id)
     applications = Application.objects.filter(vacancy_id=vacancy_id)
 
@@ -321,6 +325,7 @@ def my_vacancy_view(request, vacancy_id: int):
 
 
 def my_vacancy_delete_view(request, vacancy_id):
+    """Удаление вакансии"""
     try:
         Vacancy.objects.get(id=vacancy_id).delete()
         messages.success(request, 'Вакансия успешно удалена')
@@ -334,12 +339,14 @@ def my_vacancy_delete_view(request, vacancy_id):
 #                     Резюме                    #
 #################################################
 def my_resume_letsstart_view(request):
-    # предложение создать резюме
+    """Предложение создать резюме"""
+    if Resume.objects.filter(user_id=request.user.id):
+        return redirect('my_resume_form')
     return render(request, 'vacancies/resume/resume-create.html')
 
 
 def my_resume_empty_view(request):
-    # моё резюме пустая форма
+    """Моё резюме пустая форма"""
     if not request.user.is_authenticated:
         return redirect('login')
 
@@ -365,7 +372,7 @@ def my_resume_empty_view(request):
 
 
 def my_resume_view(request):
-    # моё резюме заполненная форма
+    """Моё резюме заполненная форма"""
     try:
         resume = Resume.objects.get(user_id=request.user.id)
     except Resume.DoesNotExist:
@@ -392,6 +399,7 @@ def my_resume_view(request):
 
 
 def my_resume_delete(request):
+    """Удаление резюме"""
     try:
         Resume.objects.get(user_id=request.user.id).delete()
         messages.success(request, 'Резюме успешно удалено')

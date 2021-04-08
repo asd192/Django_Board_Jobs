@@ -19,8 +19,7 @@ class MyRegistrationForm(UserCreationForm):
         self.fields['email'].help_text = 'Ваш электронный почтовый ящик'
         self.fields['first_name'].help_text = 'Не менее 2-ух букв'
         self.fields['last_name'].help_text = 'Не менее 3-ёх букв'
-        self.fields[
-            'password1'].help_text = 'Придумайте надёжный пароль не менее 8 символов.'
+        self.fields['password1'].help_text = 'Придумайте надёжный пароль не менее 8 символов.'
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
