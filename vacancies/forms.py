@@ -144,6 +144,7 @@ class VacancyForm(forms.ModelForm):
 class ApplicationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['written_username'].label = 'ФИО'
         self.fields['written_username'].help_text = 'Ваши настоящие ФИО'
         self.fields['written_phone'].help_text = 'Номер телефона'
         self.fields['written_cover_letter'].help_text = 'Не более 10 000 символов'
