@@ -100,7 +100,7 @@ class CompanyForm(forms.ModelForm):
 
 class VacancyForm(forms.ModelForm):
     skills = forms.RegexField(
-        regex=r'^[а-яА-Яa-zA-Z0-9, ]*$',
+        regex=r'^[а-яА-Яa-zA-Z0-9,. ]*$',
         error_messages={'invalid': 'Допускаются только БУКВЫ, ЦИФРЫ, ЗАПЯТЫЕ и ПРОБЕЛЫ'},
     )
 
