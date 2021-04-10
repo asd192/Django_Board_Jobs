@@ -161,7 +161,7 @@ class ApplicationForm(forms.ModelForm):
         model = Application
         fields = ('written_username', 'written_phone', 'written_cover_letter', 'written_photo')
         error_messages = {
-            'written_phone': {'invalid': 'Введите корректный номер телефона. Пример: +7 999 887 33 22'},
+            'written_phone': {'invalid': 'Введите корректный номер телефона. Пример: +79991115533'},
         }
 
 
