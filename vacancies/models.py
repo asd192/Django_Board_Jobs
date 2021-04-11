@@ -8,7 +8,11 @@ from conf.settings import MEDIA_COMPANY_IMAGE_DIR, MEDIA_SPECIALITY_IMAGE_DIR, M
 class Specialty(models.Model):
     code = models.CharField("код", primary_key=True, max_length=30)
     title = models.CharField("название", max_length=100)
-    picture = models.ImageField("изображение", upload_to=MEDIA_SPECIALITY_IMAGE_DIR, default='100x60.gif')
+    picture = models.ImageField(
+        "изображение",
+        upload_to=MEDIA_SPECIALITY_IMAGE_DIR,
+        default=f'{MEDIA_SPECIALITY_IMAGE_DIR}/100x60.gif',
+    )
 
     class Meta:
         verbose_name = "специализация"
@@ -31,7 +35,11 @@ class Company(models.Model):
     location = models.CharField("город", max_length=25)
     description = models.TextField("информация о компании", max_length=5000)
     employee_count = models.CharField("количество сотрудников", max_length=10, choices=CHOICES_EMPLOYEE_COUNT)
-    logo = models.ImageField("логотип", upload_to=MEDIA_COMPANY_IMAGE_DIR, default='100x60.gif')
+    logo = models.ImageField(
+        "логотип",
+        upload_to=MEDIA_COMPANY_IMAGE_DIR,
+        default=f'{MEDIA_COMPANY_IMAGE_DIR}/100x60.gif',
+    )
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="owner_user", verbose_name="owner_id")
 
     def employee_count_verbose(self):
@@ -71,9 +79,7 @@ class Application(models.Model):
     written_username = models.CharField("имя", max_length=50)
     written_phone = PhoneNumberField("номер телефона", region='RU')
     written_cover_letter = models.TextField("сопроводительное письмо", max_length=10000)
-    written_photo = models.ImageField(
-        "фотография", upload_to=MEDIA_USER_PHOTO_IMAGE_DIR, blank=True, default=None,
-    )
+    written_photo = models.ImageField("фотография", upload_to=MEDIA_USER_PHOTO_IMAGE_DIR, blank=True)
     vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name="applications")
     user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="applications", null=True)
 

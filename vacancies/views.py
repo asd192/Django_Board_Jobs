@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView, UpdateView, View
 from django.views.generic.list import ListView
 
-from conf.settings import MEDIA_COMPANY_IMAGE_DIR
+from conf.settings import MEDIA_COMPANY_IMAGE_DIR, MEDIA_USER_PHOTO_IMAGE_DIR
 from vacancies.forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
 from vacancies.forms import MyLoginForm, MyRegistrationForm, UserProfileForm
 from vacancies.models import Application, Company, Resume, Specialty, Vacancy
@@ -179,6 +179,11 @@ def vacancy_view(request, vacancy_id: int):
 
             if vacancy_send_form.is_valid():
                 vacancy_data = vacancy_send_form.cleaned_data
+                written_photo = vacancy_data['written_photo']
+                if written_photo is None or written_photo is False:
+                    vacancy_data['written_photo'] = ''
+                else:
+                    vacancy_data['written_photo'] = f"{MEDIA_USER_PHOTO_IMAGE_DIR}/{vacancy_data['written_photo']}"
                 user_in_application.update(**vacancy_data)
                 messages.success(request, 'Отклик обновлен')
                 return redirect('resume_send', vacancy_id=vacancy.id)
