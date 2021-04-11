@@ -35,7 +35,7 @@
                 </li>
                 <li class="nav-item">
 
-                    {% if request.path == '/resumes' %}
+                    {% if 'resumes' in request.path %}
                         <a class="nav-link active" href="#">Все резюме</a>
                     {% else %}
                         <a class="nav-link" href="{% url 'resumes' %}">Все резюме</a>
