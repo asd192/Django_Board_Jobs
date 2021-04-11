@@ -258,7 +258,7 @@ def my_company_empty_view(request):
             return redirect('my_company_letsstart')
         else:
             messages.error(request, 'Проверьте правильность заполнения формы')
-    print(company_form)
+
     return render(request, 'vacancies/company/company-edit.html', {'form': company_form})
 
 
