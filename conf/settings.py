@@ -45,6 +45,7 @@ INSTALLED_APPS += [
     'crispy_forms',
     'phonenumber_field',
     'bootstrap_pagination',
+    'captcha',
     'debug_toolbar',
 ]
 
@@ -142,6 +143,7 @@ MEDIA_COMPANY_IMAGE_DIR = 'company_images'
 MEDIA_SPECIALITY_IMAGE_DIR = 'speciality_images'
 MEDIA_USER_PHOTO_IMAGE_DIR = 'user_photo'
 
+# messages -> css bootstrap
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-secondary',
     messages.INFO: 'alert-info',
@@ -149,3 +151,8 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+# captcha field
+CAPTCHA_IMAGE_SIZE = (100, 40)
+CAPTCHA_LENGTH = 3
+CAPTCHA_2X_IMAGE = True

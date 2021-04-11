@@ -1,3 +1,4 @@
+from captcha.fields import CaptchaField
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Column, HTML, Layout, Row, Submit
 from django import forms
@@ -12,6 +13,7 @@ class MyRegistrationForm(UserCreationForm):
     first_name = forms.CharField(label='Имя', min_length=2, max_length=20)
     last_name = forms.CharField(label='Фамилия', min_length=3, max_length=30)
     email = forms.EmailField(label='Email', min_length=6, max_length=50)
+    captcha = CaptchaField(label='Капча')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -19,7 +21,8 @@ class MyRegistrationForm(UserCreationForm):
         self.fields['email'].help_text = 'Ваш электронный почтовый ящик'
         self.fields['first_name'].help_text = 'Не менее 2-ух букв'
         self.fields['last_name'].help_text = 'Не менее 3-ёх букв'
-        self.fields['password1'].help_text = 'Придумайте надёжный пароль не менее 8 символов.'
+        self.fields['password1'].help_text = 'Придумайте надёжный пароль не менее 8 символов'
+        self.fields['captcha'].help_text = 'Докажите, что вы умеете вводить капчи'
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -31,7 +34,7 @@ class MyRegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ("username", "email", "first_name", "last_name", "password1", "password2")
+        fields = ("username", "email", "first_name", "last_name", "password1", "password2", "captcha")
 
 
 class MyLoginForm(AuthenticationForm):

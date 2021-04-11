@@ -8,8 +8,7 @@ from conf.settings import MEDIA_COMPANY_IMAGE_DIR, MEDIA_SPECIALITY_IMAGE_DIR, M
 class Specialty(models.Model):
     code = models.CharField("код", primary_key=True, max_length=30)
     title = models.CharField("название", max_length=100)
-    picture = models.ImageField("изображение", upload_to=MEDIA_SPECIALITY_IMAGE_DIR,
-                                default=f'100x60.gif')
+    picture = models.ImageField("изображение", upload_to=MEDIA_SPECIALITY_IMAGE_DIR, default='100x60.gif')
 
     class Meta:
         verbose_name = "специализация"
@@ -32,7 +31,7 @@ class Company(models.Model):
     location = models.CharField("город", max_length=25)
     description = models.TextField("информация о компании", max_length=5000)
     employee_count = models.CharField("количество сотрудников", max_length=10, choices=CHOICES_EMPLOYEE_COUNT)
-    logo = models.ImageField("логотип", upload_to=MEDIA_COMPANY_IMAGE_DIR, default=f'100x60.gif')
+    logo = models.ImageField("логотип", upload_to=MEDIA_COMPANY_IMAGE_DIR, default='100x60.gif')
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="owner_user", verbose_name="owner_id")
 
     def employee_count_verbose(self):

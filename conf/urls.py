@@ -67,6 +67,7 @@ urlpatterns += [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('register/', Registration.as_view(), name='register'),
     path('admin/', admin.site.urls),
+    path('captcha/', include('captcha.urls')),
 ]
 
 if settings.DEBUG:
