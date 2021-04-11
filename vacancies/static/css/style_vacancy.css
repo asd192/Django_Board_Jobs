@@ -224,7 +224,7 @@ a:not([href]):not([tabindex]):active {
     border-color: #1e7e34;
 }
 
-.nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
     color: #fff;
     background-color: #17a2b8;
 }
@@ -232,6 +232,7 @@ a:not([href]):not([tabindex]):active {
 a {
     color: #454a46;
 }
+
 a:hover {
     color: #17a2b8;
 }
@@ -246,4 +247,10 @@ a:hover {
 
 .alert {
     text-align: center;
+}
+
+.resume-labels {
+    color: #1d486d;
+    font-weight: 500;
+    font-style: italic;
 }

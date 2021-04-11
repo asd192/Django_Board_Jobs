@@ -113,9 +113,16 @@ class Resume(models.Model):
     experience = models.TextField("опыт работы", max_length=1000)
     portfolio = models.URLField("ссылка на портфолио", max_length=100)
 
+    def status_verbose(self):
+        return dict(Resume.CHOICES_STATUS)[self.status]
+
+    def grade_verbose(self):
+        return dict(Resume.CHOICES_GRADE)[self.grade]
+
     class Meta:
         verbose_name = "резюме"
         verbose_name_plural = "резюме"
+        ordering = ['id']
 
     def __str__(self):
         return f"{self.surname} {self.name}"

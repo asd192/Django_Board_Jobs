@@ -26,7 +26,7 @@ from vacancies.views import Login, Registration
 from vacancies.views import my_company_delete_view, my_company_empty_view, my_company_view, MyCompanyLetsstarView
 from vacancies.views import my_resume_delete, my_resume_empty_view, my_resume_letsstart_view, my_resume_view
 from vacancies.views import my_vacancies_list_view, my_vacancy_delete_view, my_vacancy_empty_view, my_vacancy_view
-from vacancies.views import ResumeSendingView, SearchView, VacanciesSpecialtyView
+from vacancies.views import ResumesAccessView, ResumeSendingView, ResumesView, SearchView, VacanciesSpecialtyView
 
 handler404 = custom_handler404
 handler500 = custom_handler500
@@ -35,6 +35,8 @@ urlpatterns = [
     # основные
     path('', MainView.as_view(), name='main'),
     path('vacancies', VacanciesView.as_view(), name='vacancies'),  # все вакансии
+    path('resumes', ResumesView.as_view(), name='resumes'),  # все резюме
+    path('resumes_access', ResumesAccessView.as_view(), name='resumes_access'),  # все резюме
     path('vacancies/<int:vacancy_id>', vacancy_view, name='vacancy'),  # одна вакансия
     path('vacancies/cat/<str:specialty>', VacanciesSpecialtyView.as_view(), name='vacancies_specialty'),
     path('companies/<int:company_id>', CompanyCardView.as_view(), name='company'),  # компания

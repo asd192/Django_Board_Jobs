@@ -101,6 +101,34 @@ class VacanciesSpecialtyView(VacanciesView):
         return context
 
 
+class ResumesView(ListView):
+    """Все резюме"""
+    template_name = 'vacancies/resumes.html'
+    model = Resume
+    context_object_name = 'resumes'
+    paginate_by = 3
+
+    def get(self, request, *args, **kwargs):
+        try:
+            Company.objects.get(owner_id=request.user.id)
+        except Company.DoesNotExist:
+            return redirect('resumes_access')
+        else:
+            return super().get(request, *args, **kwargs)
+
+    def get_queryset(self, **kwargs):
+        return self.model.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(ResumesView, self).get_context_data(**kwargs)
+        context['resumes_count'] = Resume.objects.count()
+        return context
+
+
+class ResumesAccessView(TemplateView):
+    template_name = 'vacancies/resumes-access.html'
+
+
 class SearchView(VacanciesView):
     """Поиск вакансий(строка поиска)"""
     template_name = 'vacancies/search.html'

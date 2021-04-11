@@ -1,0 +1,29 @@
+{% extends 'vacancies/base.html' %}
+
+{% load bootstrap_pagination %}
+{% load my_filters %}
+
+{% block title_head %}Все резюме | Board Jobs{% endblock title_head %}
+
+{% block container %}
+
+    <main class="container mt-3">
+        <section>
+            <h1 class="h1 text-center mx-auto mt-4 pt-5" style="font-size: 70px;"><strong>
+                Все резюме</strong>
+            </h1>
+
+            <div class="row mt-5">
+                <div class="col-12 col-lg-8 offset-lg-2 m-auto">
+
+                    <p class="text-center mx-auto m-5"><strong>
+                        Для просмотра резюме<br> зарегистрируйтесь и создайте страницу компании.</strong>
+                    </p>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+
+{% endblock %}
