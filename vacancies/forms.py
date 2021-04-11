@@ -75,8 +75,8 @@ class CompanyForm(forms.ModelForm):
                     HTML(
                         '''
                         <div class="row">
-                            <div class="mx-auto">{% if form.logo.value %}<img src="{{ form.logo.value.url }}"{% endif %}
-                                width="140" height="60">
+                            <div class="mx-auto">{% if form.logo.value %}<img src="{{ form.logo.value.url }}"
+                                width="140" height="60">{% endif %}
                             </div>
                         </div>
                         ''',

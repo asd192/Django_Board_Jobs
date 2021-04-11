@@ -35,11 +35,7 @@ class Company(models.Model):
     location = models.CharField("город", max_length=25)
     description = models.TextField("информация о компании", max_length=5000)
     employee_count = models.CharField("количество сотрудников", max_length=10, choices=CHOICES_EMPLOYEE_COUNT)
-    logo = models.ImageField(
-        "логотип",
-        upload_to=MEDIA_COMPANY_IMAGE_DIR,
-        default=f'{MEDIA_COMPANY_IMAGE_DIR}/100x60.gif',
-    )
+    logo = models.ImageField("логотип", upload_to=MEDIA_COMPANY_IMAGE_DIR)
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="owner_user", verbose_name="owner_id")
 
     def employee_count_verbose(self):
