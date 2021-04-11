@@ -76,7 +76,7 @@ class CompanyForm(forms.ModelForm):
                         '''
                         <div class="row">
                             <div class="mx-auto">{% if form.logo.value %}<img src="{{ form.logo.value.url }}"{% endif %}
-                                width="140 height="60">
+                                width="140" height="60">
                             </div>
                         </div>
                         ''',

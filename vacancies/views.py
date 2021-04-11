@@ -172,19 +172,21 @@ def vacancy_view(request, vacancy_id: int):
     if user_in_application:
         # если уже отзывались на эту вакансию
         application_sent = True
-        vacancy_send_form = ApplicationForm(instance=user_in_application.first())
 
+        application_form = ApplicationForm(instance=user_in_application.first())
         if request.method == 'POST':
-            vacancy_send_form = ApplicationForm(request.POST, request.FILES)
-
-            if vacancy_send_form.is_valid():
-                vacancy_data = vacancy_send_form.cleaned_data
+            application_form = ApplicationForm(request.POST, request.FILES)
+            if application_form.is_valid():
+                vacancy_data = application_form.cleaned_data
                 written_photo = vacancy_data['written_photo']
+
+                # если нет фото или checkbox(очистить) в True
                 if written_photo is None or written_photo is False:
                     vacancy_data['written_photo'] = ''
                 else:
                     vacancy_data['written_photo'] = f"{MEDIA_USER_PHOTO_IMAGE_DIR}/{vacancy_data['written_photo']}"
                 user_in_application.update(**vacancy_data)
+
                 messages.success(request, 'Отклик обновлен')
                 return redirect('resume_send', vacancy_id=vacancy.id)
             else:
@@ -192,12 +194,12 @@ def vacancy_view(request, vacancy_id: int):
 
     else:
         # пустая форма отклика
-        vacancy_send_form = ApplicationForm()
+        application_form = ApplicationForm()
         if request.method == 'POST':
-            vacancy_send_form = ApplicationForm(request.POST, request.FILES)
+            application_form = ApplicationForm(request.POST, request.FILES)
 
-            if vacancy_send_form.is_valid():
-                vacancy_send_form_data = vacancy_send_form.cleaned_data
+            if application_form.is_valid():
+                vacancy_send_form_data = application_form.cleaned_data
                 vacancy_send_form_data['user_id'] = request.user.id
                 vacancy_send_form_data['vacancy_id'] = vacancy.id
                 Application(**vacancy_send_form_data).save()
@@ -207,7 +209,7 @@ def vacancy_view(request, vacancy_id: int):
                 messages.error(request, 'Проверьте правильность заполнения формы')
 
     context = {
-        'form': vacancy_send_form,
+        'form': application_form,
         'vacancy': vacancy,
         'application_sent': application_sent,
     }
@@ -256,7 +258,7 @@ def my_company_empty_view(request):
             return redirect('my_company_letsstart')
         else:
             messages.error(request, 'Проверьте правильность заполнения формы')
-
+    print(company_form)
     return render(request, 'vacancies/company/company-edit.html', {'form': company_form})
 
 
@@ -274,12 +276,12 @@ def my_company_view(request):
     company_form = CompanyForm(instance=company)
 
     if request.method == 'POST':
-        company_form = CompanyForm(request.POST, request.FILES)
+        company_form = CompanyForm(request.POST, request.FILES, instance=company)
 
         if company_form.is_valid():
             company_data = company_form.cleaned_data
             company_data['logo'] = f"{MEDIA_COMPANY_IMAGE_DIR}/{company_data['logo']}"
-            Company.objects.filter(owner_id=request.user.id).update(**company_data)
+            company_form.save()
             messages.success(request, 'Информация о компании успешно обновлена')
             return redirect('my_company_letsstart')
         else:
@@ -336,16 +338,21 @@ def my_vacancy_empty_view(request):
 
 def my_vacancy_view(request, vacancy_id: int):
     """Заполненная форма вакансии"""
-    vacancy = get_object_or_404(Vacancy, id=vacancy_id)
+    vacancy = Vacancy.objects.select_related('company').get(id=vacancy_id)
+
+    # если вакансия не принадлежит юзеру
+    if vacancy.company.owner_id != request.user.id:
+        raise Http404
+
     applications = Application.objects.filter(vacancy_id=vacancy_id)
 
     my_vacancy_form = VacancyForm(instance=vacancy)
     if request.method == 'POST':
         my_vacancy_form = VacancyForm(request.POST)
-
         if my_vacancy_form.is_valid():
             company_data = my_vacancy_form.cleaned_data
             Vacancy.objects.filter(id=vacancy_id).update(**company_data)
+
             messages.success(request, 'Информация о вакансии успешно обновлена')
             return redirect('my_vacancies')
         else:
