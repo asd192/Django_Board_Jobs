@@ -21,7 +21,7 @@ def ru_pluralize(number: Union[int, str], arg: str = 'текст, тексты, 
 
 @register.filter()
 def list_li(tags_str):
+    tags_str = str(tags_str)
     tags_str = tags_str.split(',')
     tags = '</li><li>'.join(tags_str)
-
     return f'<li>{tags}</li>'

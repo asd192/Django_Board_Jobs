@@ -23,16 +23,14 @@
                                 <div class="row">
                                     <div class="col-12 col-md-8 col-lg-9">
                                         <h2 class="h2-name h2 pb-2">{{ resume.surname }} {{ resume.name }}</h2>
-                                        <ul class="ul_skills">{{ resume.status_verbose|list_li|safe|escape }}</ul>
-                                        <p>Ожидаемая зарплата: <span
-                                                class="resume-labels">{{ resume.salary }} руб.</span></p>
-                                        <p>Квалификация: <span class="resume-labels">{{ resume.grade_verbose }}</span>
+                                        <ul class="ul_skills">
+                                        {{ resume.grade_verbose|list_li|safe|escape }}
+                                        {{ resume.status_verbose|list_li|safe|escape }}
+                                        {{ resume.salary|list_li|safe|escape }}</ul>
+                                        <p><strong>Опыт работы:</strong> <em>{{ resume.experience|linebreaks }}</em></p>
+                                        <p><strong>Образование:</strong> <em>{{ resume.education|truncatechars:150|striptags }}</em>
                                         </p>
-                                        <p>Опыт работы: <span class="resume-labels">{{ resume.experience }}</span></p>
-                                        <p>Образование: <span
-                                                class="resume-labels">{{ resume.education|truncatechars:150|striptags }}</span>
-                                        </p>
-                                        <p>Ссылка на портфолио: <em><a href="{{ resume.portfolio }}" class="text-info"
+                                        <p><strong>Ссылка на портфолио:</strong> <em><a href="{{ resume.portfolio }}" class="text-info"
                                                                        target="_blank">{{ resume.portfolio }}</a></em>
                                         </p>
                                     </div>
