@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.db.models import Count
@@ -91,6 +92,7 @@ class VacanciesView(ListView):
 
 class VacanciesSpecialtyView(VacanciesView):
     """Вакансии по специализации"""
+
     def get_queryset(self, **kwargs):
         return self.model.objects.select_related('company').filter(specialty_id=self.kwargs['specialty'])
 
@@ -290,8 +292,9 @@ def my_company_view(request):
     return render(request, 'vacancies/company/company-edit.html', {'form': company_form})
 
 
+@login_required
 def my_company_delete_view(request):
-    """удаление моей компании"""
+    """Удаление моей компании"""
     try:
         Company.objects.get(owner_id=request.user.id).delete()
         messages.success(request, 'Компания успешно удалена')
@@ -367,13 +370,20 @@ def my_vacancy_view(request, vacancy_id: int):
     return render(request, 'vacancies/company/vacancy-edit.html', context=context)
 
 
+@login_required
 def my_vacancy_delete_view(request, vacancy_id):
     """Удаление вакансии"""
     try:
-        Vacancy.objects.get(id=vacancy_id).delete()
+        vacnacy = Vacancy.objects.get(id=vacancy_id)
+        if Company.objects.get(id=vacnacy.company_id).owner_id != request.user.id:
+            raise Http404
+        vacnacy.delete()
+
         messages.success(request, 'Вакансия успешно удалена')
     except Vacancy.DoesNotExist:
-        messages.error(request, 'Не получилось удалить вакансию, что-то пошло не так. Просьба сообщить администратору.')
+        messages.error(request, 'Не получилось удалить вакансию, что-то пошло не так.')
+    except Company.DoesNotExist:
+        raise Http404
 
     return redirect('my_vacancies')
 
@@ -441,6 +451,7 @@ def my_resume_view(request):
     return render(request, 'vacancies/resume/resume-edit.html', {'form': resume_form})
 
 
+@login_required
 def my_resume_delete(request):
     """Удаление резюме"""
     try:
