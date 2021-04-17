@@ -218,7 +218,7 @@ class MyCompanyLetsstarView(View):
         return render(request, 'vacancies/company/company-create.html')
 
 
-class MyCompanyEmptyFormView(LoginRequiredMixin, CreateView):
+class MyCompanyCreateView(LoginRequiredMixin, CreateView):
     template_name = 'vacancies/company/company-edit.html'
     model = Company
     form_class = CompanyForm
@@ -268,90 +268,98 @@ class MyCompanyDeleteView(LoginRequiredMixin, DeleteView):
         return self.post(*args, **kwargs)
 
     def get_object(self, queryset=None):
-        user_id = self.request.user.id
-        return self.get_queryset().filter(owner_id=user_id).get()
+        return self.get_queryset().get(owner_id=self.request.user.id).get()
 
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'Компания удалена')
         return super(MyCompanyDeleteView, self).delete(request, *args, **kwargs)
 
 
-# @login_required
-# def my_company_delete_view(request):
-#     """Удаление моей компании"""
-#     try:
-#         Company.objects.get(owner_id=request.user.id).delete()
-#         messages.success(request, 'Компания успешно удалена')
-#     except Company.DoesNotExist:
-#         messages.error(request, 'Не получилось удалить компанию, что-то пошло не так. Просьба сообщить администратору.')
+class MyVacanciesView(LoginRequiredMixin, ListView):
+    template_name = 'vacancies/company/vacancy-list.html'
+    model = Vacancy
+    context_object_name = 'vacancies'
+
+    def get_queryset(self):
+        return Vacancy.objects.filter(company_id=1).annotate(application_count=Count('applications'))
+
+
+class MyVacancyCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'vacancies/company/vacancy-edit.html'
+    model = Vacancy
+    form_class = VacancyForm
+
+    def get_success_url(self, **kwargs):
+        return reverse_lazy('my_vacancies')
+
+    def form_valid(self, form):
+        form_add = form.save(commit=False)
+        form_add.company_id = Company.objects.get(owner_id=self.request.user.id).id
+        form.save()
+
+        messages.success(self.request, 'Вакансия успешно создана')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Проверьте правильность заполнения формы')
+        return super().form_invalid(form)
+
+
+class MyVacancyView(LoginRequiredMixin, UpdateView):
+    template_name = 'vacancies/company/vacancy-edit.html'
+    model = Vacancy
+    form_class = VacancyForm
+    pk_url_kwarg = 'vacancy_id'
+
+    def get_object(self, queryset=None):
+        vacancy = get_object_or_404(Vacancy, id=self.kwargs['vacancy_id'])
+        company_user = get_object_or_404(Company, owner_id=self.request.user.id)
+        if vacancy.company_id != company_user.id:
+            raise Http404
+        return vacancy
+
+    def get_success_url(self):
+        return reverse_lazy('my_vacancy_form', kwargs={'vacancy_id': self.kwargs['vacancy_id']})
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, 'Информация о вакансии успешно обновлена')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Не удалось обновить вакансию. Проверьте правильность заполнения формы')
+        return super().form_invalid(form)
+
+
+# def my_vacancy_view(request, vacancy_id: int):
+#     """Заполненная форма вакансии"""
+#     vacancy = Vacancy.objects.select_related('company').get(id=vacancy_id)
 #
-#     return redirect('my_company_letsstart')
-
-
-def my_vacancies_list_view(request):
-    """Список вакансий компании"""
-    try:
-        company_id = Company.objects.get(owner_id=request.user.id).id
-    except Company.DoesNotExist:
-        # если в обход меню на /mycompany/vacancies/
-        if request.user.is_authenticated:
-            return redirect('my_company_letsstart')
-        else:
-            return redirect('login')
-
-    vacancies = Vacancy.objects.filter(company_id=company_id).annotate(application_count=Count('applications'))
-
-    return render(request, 'vacancies/company/vacancy-list.html', {'vacancies': vacancies})
-
-
-def my_vacancy_empty_view(request):
-    """Пустая форма вакансии"""
-    vacancy_empty_form = VacancyForm()
-
-    if request.method == 'POST':
-        vacancy_empty_form = VacancyForm(request.POST)
-
-        if vacancy_empty_form.is_valid():
-            form_data = vacancy_empty_form.save(commit=False)
-            form_data.company_id = Company.objects.get(owner_id=request.user.id).id
-            form_data.save()
-            messages.success(request, 'Вакансия успешно создана')
-            return redirect('my_vacancies')
-        else:
-            messages.error(request, 'Проверьте правильность заполнения формы')
-
-    return render(request, 'vacancies/company/vacancy-edit.html', {'form': vacancy_empty_form})
-
-
-def my_vacancy_view(request, vacancy_id: int):
-    """Заполненная форма вакансии"""
-    vacancy = Vacancy.objects.select_related('company').get(id=vacancy_id)
-
-    # если вакансия не принадлежит юзеру
-    if vacancy.company.owner_id != request.user.id:
-        raise Http404
-
-    applications = Application.objects.filter(vacancy_id=vacancy_id)
-
-    my_vacancy_form = VacancyForm(instance=vacancy)
-    if request.method == 'POST':
-        my_vacancy_form = VacancyForm(request.POST)
-        if my_vacancy_form.is_valid():
-            company_data = my_vacancy_form.cleaned_data
-            Vacancy.objects.filter(id=vacancy_id).update(**company_data)
-
-            messages.success(request, 'Информация о вакансии успешно обновлена')
-            return redirect('my_vacancies')
-        else:
-            messages.error(request, 'Проверьте правильность заполнения формы')
-
-    context = {
-        'form': my_vacancy_form,
-        'applications': applications,
-        'pk': vacancy.pk,
-    }
-
-    return render(request, 'vacancies/company/vacancy-edit.html', context=context)
+#     # если вакансия не принадлежит юзеру
+#     if vacancy.company.owner_id != request.user.id:
+#         raise Http404
+#
+#     applications = Application.objects.filter(vacancy_id=vacancy_id)
+#
+#     my_vacancy_form = VacancyForm(instance=vacancy)
+#     if request.method == 'POST':
+#         my_vacancy_form = VacancyForm(request.POST)
+#         if my_vacancy_form.is_valid():
+#             company_data = my_vacancy_form.cleaned_data
+#             Vacancy.objects.filter(id=vacancy_id).update(**company_data)
+#
+#             messages.success(request, 'Информация о вакансии успешно обновлена')
+#             return redirect('my_vacancies')
+#         else:
+#             messages.error(request, 'Проверьте правильность заполнения формы')
+#
+#     context = {
+#         'form': my_vacancy_form,
+#         'applications': applications,
+#         'pk': vacancy.pk,
+#     }
+#
+#     return render(request, 'vacancies/company/vacancy-edit.html', context=context)
 
 
 @login_required

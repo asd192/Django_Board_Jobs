@@ -23,9 +23,9 @@ from django.urls import include, path
 from vacancies.views import CompanyCardView, MainView, UserProfile, VacanciesView, VacancyView
 from vacancies.views import custom_handler404, custom_handler500
 from vacancies.views import Login, Registration
-from vacancies.views import MyCompanyDeleteView, MyCompanyEmptyFormView, MyCompanyView, MyCompanyLetsstarView
+from vacancies.views import MyCompanyDeleteView, MyCompanyCreateView, MyCompanyView, MyCompanyLetsstarView
 from vacancies.views import my_resume_delete, my_resume_empty_view, my_resume_letsstart_view, my_resume_view
-from vacancies.views import my_vacancies_list_view, my_vacancy_delete_view, my_vacancy_empty_view, my_vacancy_view
+from vacancies.views import MyVacanciesView, my_vacancy_delete_view, MyVacancyCreateView, MyVacancyView
 from vacancies.views import ResumesAccessView, ResumeSendingView, ResumesView, SearchView, VacanciesSpecialtyView
 
 handler404 = custom_handler404
@@ -46,13 +46,13 @@ urlpatterns = [
 
     # компания
     path('mycompany/letsstart/', MyCompanyLetsstarView.as_view(), name='my_company_letsstart'),  # создать компанию
-    path('mycompany/create/', MyCompanyEmptyFormView.as_view(), name='my_company_empty_form'),  # пустая форма
+    path('mycompany/create/', MyCompanyCreateView.as_view(), name='my_company_empty_form'),  # пустая форма
     path('mycompany/', MyCompanyView.as_view(), name='my_company_form'),  # заполненная форма
     path('mycompany/delete/', MyCompanyDeleteView.as_view(), name='my_company_delete'),  # удаление компании
     # компания -> вакансии
-    path('mycompany/vacancies/', my_vacancies_list_view, name='my_vacancies'),  # мои вакансии - список
-    path('mycompany/vacancies/create/', my_vacancy_empty_view, name='my_vacancy_empty_form'),  # пустая форма
-    path('mycompany/vacancies/<int:vacancy_id>', my_vacancy_view, name='my_vacancy_form'),  # заполненная форма
+    path('mycompany/vacancies/', MyVacanciesView.as_view(), name='my_vacancies'),  # мои вакансии - список
+    path('mycompany/vacancies/create/', MyVacancyCreateView.as_view(), name='my_vacancy_empty_form'),  # пустая форма
+    path('mycompany/vacancies/<int:vacancy_id>', MyVacancyView.as_view(), name='my_vacancy_form'),  # заполненная форма
     path('mycompany/vacancies/<int:vacancy_id>/delete/', my_vacancy_delete_view, name='my_vacancy_delete'),
 
     # резюме
