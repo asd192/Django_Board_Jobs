@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView, UpdateView, View
+from django.views.generic import CreateView, DeleteView, TemplateView, UpdateView, View
 from django.views.generic.list import ListView
 
 from conf.settings import MEDIA_COMPANY_IMAGE_DIR
@@ -223,8 +223,7 @@ class MyCompanyEmptyFormView(LoginRequiredMixin, CreateView):
     model = Company
     form_class = CompanyForm
 
-    def get_success_url(self, **kwargs):
-        # return reverse_lazy('resume_send', kwargs={'vacancy_id': self.kwargs['vacancy_id']})
+    def get_success_url(self):
         return reverse_lazy('my_company_letsstart')
 
     def form_valid(self, form):
@@ -240,47 +239,53 @@ class MyCompanyEmptyFormView(LoginRequiredMixin, CreateView):
         return super().form_invalid(form)
 
 
-class MyCompanyView(UpdateView):
-    pass
+class MyCompanyView(LoginRequiredMixin, UpdateView):
+    template_name = 'vacancies/company/company-edit.html'
+    model = Company
+    form_class = CompanyForm
 
-# def my_company_view(request):
-#     """Заполненная форма компании"""
+    def get_success_url(self):
+        return reverse_lazy('my_company_letsstart')
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Company, owner_id=self.request.user.id)
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, 'Информация о компании успешно обновлена')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Не удалось обновить. Проверьте правильность заполнения формы')
+        return super().form_invalid(form)
+
+
+class MyCompanyDeleteView(LoginRequiredMixin, DeleteView):
+    model = Company
+    success_url = reverse_lazy("my_company_letsstart")
+
+    def get(self, *args, **kwargs):
+        return self.post(*args, **kwargs)
+
+    def get_object(self, queryset=None):
+        user_id = self.request.user.id
+        return self.get_queryset().filter(owner_id=user_id).get()
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Компания удалена')
+        return super(MyCompanyDeleteView, self).delete(request, *args, **kwargs)
+
+
+# @login_required
+# def my_company_delete_view(request):
+#     """Удаление моей компании"""
 #     try:
-#         company = Company.objects.get(owner_id=request.user.id)
+#         Company.objects.get(owner_id=request.user.id).delete()
+#         messages.success(request, 'Компания успешно удалена')
 #     except Company.DoesNotExist:
-#         # если в обход меню на /mycompany
-#         if request.user.is_authenticated:
-#             return redirect('my_company_letsstart')
-#         else:
-#             return redirect('login')
+#         messages.error(request, 'Не получилось удалить компанию, что-то пошло не так. Просьба сообщить администратору.')
 #
-#     company_form = CompanyForm(instance=company)
-#
-#     if request.method == 'POST':
-#         company_form = CompanyForm(request.POST, request.FILES, instance=company)
-#
-#         if company_form.is_valid():
-#             company_data = company_form.cleaned_data
-#             company_data['logo'] = f"{MEDIA_COMPANY_IMAGE_DIR}/{company_data['logo']}"
-#             company_form.save()
-#             messages.success(request, 'Информация о компании успешно обновлена')
-#             return redirect('my_company_letsstart')
-#         else:
-#             messages.error(request, 'Проверьте правильность заполнения формы')
-#
-#     return render(request, 'vacancies/company/company-edit.html', {'form': company_form})
-
-
-@login_required
-def my_company_delete_view(request):
-    """Удаление моей компании"""
-    try:
-        Company.objects.get(owner_id=request.user.id).delete()
-        messages.success(request, 'Компания успешно удалена')
-    except Company.DoesNotExist:
-        messages.error(request, 'Не получилось удалить компанию, что-то пошло не так. Просьба сообщить администратору.')
-
-    return redirect('my_company_letsstart')
+#     return redirect('my_company_letsstart')
 
 
 def my_vacancies_list_view(request):
