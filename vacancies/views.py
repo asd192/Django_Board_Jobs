@@ -163,7 +163,7 @@ class CompanyCardView(VacanciesView):
 
 
 class VacancyView(CreateView):
-    """Страница вакансии"""
+    """Страница вакансии + отклик"""
     template_name = 'vacancies/vacancy.html'
     model = Vacancy
     form_class = ApplicationForm
@@ -215,62 +215,60 @@ class MyCompanyLetsstarView(View):
     def get(self, request, *args, **kwargs):
         if Company.objects.filter(owner_id=request.user.id).values():
             return redirect('my_company_form')
-        else:
-            return render(request, 'vacancies/company/company-create.html')
+        return render(request, 'vacancies/company/company-create.html')
 
 
-def my_company_empty_view(request):
-    """Пустая форма компании"""
-    if not request.user.is_authenticated:
-        return redirect('login')
+class MyCompanyEmptyFormView(LoginRequiredMixin, CreateView):
+    template_name = 'vacancies/company/company-edit.html'
+    model = Company
+    form_class = CompanyForm
 
-    # если компания уже создана
-    company_exists = Company.objects.filter(owner_id=request.user.id).values()
-    if company_exists:
-        return redirect('my_company_form')
+    def get_success_url(self, **kwargs):
+        # return reverse_lazy('resume_send', kwargs={'vacancy_id': self.kwargs['vacancy_id']})
+        return reverse_lazy('my_company_letsstart')
 
-    company_form = CompanyForm()
-    if request.method == 'POST':
-        company_form = CompanyForm(request.POST, request.FILES)
+    def form_valid(self, form):
+        form_add = form.save(commit=False)
+        form_add.owner_id = self.request.user.id
+        form.save()
 
-        if company_form.is_valid():
-            company_form_update = company_form.save(commit=False)
-            company_form_update.owner_id = request.user.id
-            company_form.save()
-            messages.success(request, 'Компания успешно создана')
-            return redirect('my_company_letsstart')
-        else:
-            messages.error(request, 'Проверьте правильность заполнения формы')
+        messages.success(self.request, 'Компания успешно создана')
+        return super().form_valid(form)
 
-    return render(request, 'vacancies/company/company-edit.html', {'form': company_form})
+    def form_invalid(self, form):
+        messages.error(self.request, 'Проверьте правильность заполнения формы')
+        return super().form_invalid(form)
 
 
-def my_company_view(request):
-    """Заполненная форма компании"""
-    try:
-        company = Company.objects.get(owner_id=request.user.id)
-    except Company.DoesNotExist:
-        # если в обход меню на /mycompany
-        if request.user.is_authenticated:
-            return redirect('my_company_letsstart')
-        else:
-            return redirect('login')
+class MyCompanyView(UpdateView):
+    pass
 
-    company_form = CompanyForm(instance=company)
-
-    if request.method == 'POST':
-        company_form = CompanyForm(request.POST, request.FILES, instance=company)
-
-        if company_form.is_valid():
-            company_data = company_form.cleaned_data
-            company_data['logo'] = f"{MEDIA_COMPANY_IMAGE_DIR}/{company_data['logo']}"
-            company_form.save()
-            messages.success(request, 'Информация о компании успешно обновлена')
-            return redirect('my_company_letsstart')
-        else:
-            messages.error(request, 'Проверьте правильность заполнения формы')
-
-    return render(request, 'vacancies/company/company-edit.html', {'form': company_form})
+# def my_company_view(request):
+#     """Заполненная форма компании"""
+#     try:
+#         company = Company.objects.get(owner_id=request.user.id)
+#     except Company.DoesNotExist:
+#         # если в обход меню на /mycompany
+#         if request.user.is_authenticated:
+#             return redirect('my_company_letsstart')
+#         else:
+#             return redirect('login')
+#
+#     company_form = CompanyForm(instance=company)
+#
+#     if request.method == 'POST':
+#         company_form = CompanyForm(request.POST, request.FILES, instance=company)
+#
+#         if company_form.is_valid():
+#             company_data = company_form.cleaned_data
+#             company_data['logo'] = f"{MEDIA_COMPANY_IMAGE_DIR}/{company_data['logo']}"
+#             company_form.save()
+#             messages.success(request, 'Информация о компании успешно обновлена')
+#             return redirect('my_company_letsstart')
+#         else:
+#             messages.error(request, 'Проверьте правильность заполнения формы')
+#
+#     return render(request, 'vacancies/company/company-edit.html', {'form': company_form})
 
 
 @login_required

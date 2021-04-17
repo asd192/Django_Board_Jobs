@@ -23,7 +23,7 @@ from django.urls import include, path
 from vacancies.views import CompanyCardView, MainView, UserProfile, VacanciesView, VacancyView
 from vacancies.views import custom_handler404, custom_handler500
 from vacancies.views import Login, Registration
-from vacancies.views import my_company_delete_view, my_company_empty_view, my_company_view, MyCompanyLetsstarView
+from vacancies.views import my_company_delete_view, MyCompanyEmptyFormView, my_company_view, MyCompanyLetsstarView
 from vacancies.views import my_resume_delete, my_resume_empty_view, my_resume_letsstart_view, my_resume_view
 from vacancies.views import my_vacancies_list_view, my_vacancy_delete_view, my_vacancy_empty_view, my_vacancy_view
 from vacancies.views import ResumesAccessView, ResumeSendingView, ResumesView, SearchView, VacanciesSpecialtyView
@@ -46,7 +46,7 @@ urlpatterns = [
 
     # компания
     path('mycompany/letsstart/', MyCompanyLetsstarView.as_view(), name='my_company_letsstart'),  # создать компанию
-    path('mycompany/create/', my_company_empty_view, name='my_company_empty_form'),  # пустая форма
+    path('mycompany/create/', MyCompanyEmptyFormView.as_view(), name='my_company_empty_form'),  # пустая форма
     path('mycompany/', my_company_view, name='my_company_form'),  # заполненная форма
     path('mycompany/delete/', my_company_delete_view, name='my_company_delete'),  # удаление компании
     # компания -> вакансии
