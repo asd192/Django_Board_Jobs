@@ -23,24 +23,19 @@ class Specialty(models.Model):
 
 
 class Company(models.Model):
-    CHOICES_EMPLOYEE_COUNT = (
-        ('1', '0-15'),
-        ('2', '15-100'),
-        ('3', '100-500'),
-        ('4', '500-1000'),
-        ('5', '> 1000'),
-    )
+    class EmployeeCount(models.IntegerChoices):
+        c_0000_0015 = 1, ('0-15')
+        c_0015_0100 = 2, ('15-100')
+        c_0100_0500 = 3, ('0-15')
+        c_0500_1000 = 4, ('15-100')
+        c_1000_9999 = 5, ('0-15')
 
     name = models.CharField("название", max_length=100)
     location = models.CharField("город", max_length=25)
     description = models.TextField("информация о компании", max_length=5000)
-    employee_count = models.CharField("количество сотрудников", max_length=10, choices=CHOICES_EMPLOYEE_COUNT)
+    employee_count = models.CharField("количество сотрудников", max_length=10, choices=EmployeeCount.choices)
     logo = models.ImageField("логотип", upload_to=MEDIA_COMPANY_IMAGE_DIR)
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="owner_user", verbose_name="owner_id")
-
-    def employee_count_verbose(self):
-        """Значение списка. Использование в шаблоне -> {{ model.employee_count_verbose }}"""
-        return dict(Company.CHOICES_EMPLOYEE_COUNT)[self.employee_count]
 
     class Meta:
         verbose_name = "компания"
@@ -88,36 +83,28 @@ class Application(models.Model):
 
 
 class Resume(models.Model):
-    CHOICES_STATUS = (
-        ('1', 'Не ищу работу'),
-        ('2', 'Рассматриваю предложения'),
-        ('3', 'Ищу работу'),
-    )
+    class Grade(models.IntegerChoices):
+        intern = 1, ('Стажер')
+        junior = 2, ('Джуниор')
+        middle = 3, ('Миддл')
+        senior = 4, ('Синьор')
+        lead = 5, ('Лид')
 
-    CHOICES_GRADE = (
-        ('1', 'Стажер'),
-        ('2', 'Джуниор'),
-        ('3', 'Миддл'),
-        ('4', 'Синьор'),
-        ('5', 'Лид'),
-    )
+    class Status(models.IntegerChoices):
+        not_search = 1, ('Не ищу работу')
+        thinking = 2, ('Рассматриваю предложения')
+        search = 3, ('Ищу работу')
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="resumes")
     name = models.CharField("имя", max_length=15)
     surname = models.CharField("фамилия", max_length=30)
-    status = models.CharField("готовность к работе", max_length=10, choices=CHOICES_STATUS)
+    status = models.CharField("готовность к работе", max_length=10, choices=Status.choices)
     specialty = models.ForeignKey(Specialty, on_delete=models.CASCADE, max_length=30, verbose_name="специализация")
     salary = models.IntegerField("ожидаемое вознаграждение")
-    grade = models.CharField("квалификация", max_length=10, choices=CHOICES_GRADE)
+    grade = models.CharField("квалификация", max_length=10, choices=Grade.choices)
     education = models.TextField("образование", max_length=1000)
     experience = models.TextField("опыт работы", max_length=1000)
     portfolio = models.URLField("ссылка на портфолио", max_length=100)
-
-    def status_verbose(self):
-        return dict(Resume.CHOICES_STATUS)[self.status]
-
-    def grade_verbose(self):
-        return dict(Resume.CHOICES_GRADE)[self.grade]
 
     class Meta:
         verbose_name = "резюме"
