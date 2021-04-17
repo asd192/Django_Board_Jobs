@@ -23,9 +23,9 @@ from django.urls import include, path
 from vacancies.views import CompanyCardView, MainView, UserProfile, VacanciesView, VacancyView
 from vacancies.views import custom_handler404, custom_handler500
 from vacancies.views import Login, Registration
-from vacancies.views import MyCompanyDeleteView, MyCompanyCreateView, MyCompanyView, MyCompanyLetsstarView
-from vacancies.views import my_resume_delete, my_resume_empty_view, my_resume_letsstart_view, my_resume_view
-from vacancies.views import MyVacanciesView, my_vacancy_delete_view, MyVacancyCreateView, MyVacancyView
+from vacancies.views import MyCompanyCreateView, MyCompanyDeleteView, MyCompanyLetsstarView, MyCompanyView
+from vacancies.views import MyResumeDeleteView, MyResumeLetsstartView, MyResumeCreateView, MyResumeView
+from vacancies.views import MyVacanciesView, MyVacancyDeleteView, MyVacancyCreateView, MyVacancyView
 from vacancies.views import ResumesAccessView, ResumeSendingView, ResumesView, SearchView, VacanciesSpecialtyView
 
 handler404 = custom_handler404
@@ -53,13 +53,13 @@ urlpatterns = [
     path('mycompany/vacancies/', MyVacanciesView.as_view(), name='my_vacancies'),  # мои вакансии - список
     path('mycompany/vacancies/create/', MyVacancyCreateView.as_view(), name='my_vacancy_empty_form'),  # пустая форма
     path('mycompany/vacancies/<int:vacancy_id>', MyVacancyView.as_view(), name='my_vacancy_form'),  # заполненная форма
-    path('mycompany/vacancies/<int:vacancy_id>/delete/', my_vacancy_delete_view, name='my_vacancy_delete'),
+    path('mycompany/vacancies/<int:vacancy_id>/delete/', MyVacancyDeleteView.as_view(), name='my_vacancy_delete'),
 
     # резюме
-    path('myresume/letsstart', my_resume_letsstart_view, name='my_resume_letsstart'),  # предложение создать
-    path('myresume/create/', my_resume_empty_view, name='my_resume_empty_form'),  # пустая форма
-    path('myresume/', my_resume_view, name='my_resume_form'),  # заполненная форма
-    path('myresume/delete', my_resume_delete, name='my_resume_delete'),  # удаление резюме
+    path('myresume/letsstart', MyResumeLetsstartView.as_view(), name='my_resume_letsstart'),  # предложение создать
+    path('myresume/create/', MyResumeCreateView.as_view(), name='my_resume_empty_form'),  # пустая форма
+    path('myresume/', MyResumeView.as_view(), name='my_resume_form'),  # заполненная форма
+    path('myresume/<int:user_id>/delete', MyResumeDeleteView.as_view(), name='my_resume_delete'),  # удаление резюме
 ]
 
 urlpatterns += [

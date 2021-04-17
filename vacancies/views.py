@@ -13,7 +13,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, TemplateView, UpdateView, View
 from django.views.generic.list import ListView
 
-from conf.settings import MEDIA_COMPANY_IMAGE_DIR
+import vacancies.models
 from vacancies.forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
 from vacancies.forms import MyLoginForm, MyRegistrationForm, UserProfileForm
 from vacancies.models import Application, Company, Resume, Specialty, Vacancy
@@ -219,6 +219,7 @@ class MyCompanyLetsstarView(View):
 
 
 class MyCompanyCreateView(LoginRequiredMixin, CreateView):
+    """Пустая форма моей компании"""
     template_name = 'vacancies/company/company-edit.html'
     model = Company
     form_class = CompanyForm
@@ -240,6 +241,7 @@ class MyCompanyCreateView(LoginRequiredMixin, CreateView):
 
 
 class MyCompanyView(LoginRequiredMixin, UpdateView):
+    """Заполненная форма моей компании"""
     template_name = 'vacancies/company/company-edit.html'
     model = Company
     form_class = CompanyForm
@@ -261,6 +263,7 @@ class MyCompanyView(LoginRequiredMixin, UpdateView):
 
 
 class MyCompanyDeleteView(LoginRequiredMixin, DeleteView):
+    """Удаление компании"""
     model = Company
     success_url = reverse_lazy("my_company_letsstart")
 
@@ -276,15 +279,18 @@ class MyCompanyDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class MyVacanciesView(LoginRequiredMixin, ListView):
+    """Мои вакансии"""
     template_name = 'vacancies/company/vacancy-list.html'
     model = Vacancy
     context_object_name = 'vacancies'
 
     def get_queryset(self):
-        return Vacancy.objects.filter(company_id=1).annotate(application_count=Count('applications'))
+        company_id = get_object_or_404(Company, owner_id=self.request.user.id)
+        return Vacancy.objects.filter(company_id=company_id).annotate(application_count=Count('applications'))
 
 
 class MyVacancyCreateView(LoginRequiredMixin, CreateView):
+    """Пустая форма вакансии"""
     template_name = 'vacancies/company/vacancy-edit.html'
     model = Vacancy
     form_class = VacancyForm
@@ -306,6 +312,7 @@ class MyVacancyCreateView(LoginRequiredMixin, CreateView):
 
 
 class MyVacancyView(LoginRequiredMixin, UpdateView):
+    """Заполненная форма вакансии"""
     template_name = 'vacancies/company/vacancy-edit.html'
     model = Vacancy
     form_class = VacancyForm
@@ -314,9 +321,16 @@ class MyVacancyView(LoginRequiredMixin, UpdateView):
     def get_object(self, queryset=None):
         vacancy = get_object_or_404(Vacancy, id=self.kwargs['vacancy_id'])
         company_user = get_object_or_404(Company, owner_id=self.request.user.id)
+        print(vacancy.company_id, company_user.id)
+        # проверка, что компания принадлежит юзеру
         if vacancy.company_id != company_user.id:
             raise Http404
         return vacancy
+
+    def get_context_data(self, **kwargs):
+        context = super(MyVacancyView, self).get_context_data(**kwargs)
+        context['vacancy_exists'] = self.kwargs['vacancy_id']
+        return context
 
     def get_success_url(self):
         return reverse_lazy('my_vacancy_form', kwargs={'vacancy_id': self.kwargs['vacancy_id']})
@@ -331,129 +345,98 @@ class MyVacancyView(LoginRequiredMixin, UpdateView):
         return super().form_invalid(form)
 
 
-# def my_vacancy_view(request, vacancy_id: int):
-#     """Заполненная форма вакансии"""
-#     vacancy = Vacancy.objects.select_related('company').get(id=vacancy_id)
-#
-#     # если вакансия не принадлежит юзеру
-#     if vacancy.company.owner_id != request.user.id:
-#         raise Http404
-#
-#     applications = Application.objects.filter(vacancy_id=vacancy_id)
-#
-#     my_vacancy_form = VacancyForm(instance=vacancy)
-#     if request.method == 'POST':
-#         my_vacancy_form = VacancyForm(request.POST)
-#         if my_vacancy_form.is_valid():
-#             company_data = my_vacancy_form.cleaned_data
-#             Vacancy.objects.filter(id=vacancy_id).update(**company_data)
-#
-#             messages.success(request, 'Информация о вакансии успешно обновлена')
-#             return redirect('my_vacancies')
-#         else:
-#             messages.error(request, 'Проверьте правильность заполнения формы')
-#
-#     context = {
-#         'form': my_vacancy_form,
-#         'applications': applications,
-#         'pk': vacancy.pk,
-#     }
-#
-#     return render(request, 'vacancies/company/vacancy-edit.html', context=context)
-
-
-@login_required
-def my_vacancy_delete_view(request, vacancy_id):
+class MyVacancyDeleteView(LoginRequiredMixin, DeleteView):
     """Удаление вакансии"""
-    try:
-        vacnacy = Vacancy.objects.get(id=vacancy_id)
-        if Company.objects.get(id=vacnacy.company_id).owner_id != request.user.id:
+    model = Vacancy
+    success_url = reverse_lazy("my_vacancies")
+    pk_url_kwarg = 'vacancy_id'
+
+    def get(self, *args, **kwargs):
+        return self.post(*args, **kwargs)
+
+    def get_object(self, queryset=None):
+        vacnacy = get_object_or_404(Vacancy, id=self.kwargs['vacancy_id'])
+        company_user = get_object_or_404(Company, owner_id=self.request.user.id)
+        if vacnacy.company_id != company_user.id:
             raise Http404
-        vacnacy.delete()
+        return vacnacy
 
-        messages.success(request, 'Вакансия успешно удалена')
-    except Vacancy.DoesNotExist:
-        messages.error(request, 'Не получилось удалить вакансию, что-то пошло не так.')
-    except Company.DoesNotExist:
-        raise Http404
-
-    return redirect('my_vacancies')
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Вакансия удалена')
+        return super(MyVacancyDeleteView, self).delete(request, *args, **kwargs)
 
 
 #################################################
 #                     Резюме                    #
 #################################################
-def my_resume_letsstart_view(request):
-    """Предложение создать резюме"""
-    if Resume.objects.filter(user_id=request.user.id):
-        return redirect('my_resume_form')
-    return render(request, 'vacancies/resume/resume-create.html')
+class MyResumeLetsstartView(LoginRequiredMixin, View):
+    """Резюме, редложение создать"""
 
-
-def my_resume_empty_view(request):
-    """Моё резюме пустая форма"""
-    if not request.user.is_authenticated:
-        return redirect('login')
-
-    # если резюме уже создано
-    resume_exists = Resume.objects.filter(user_id=request.user.id)
-    if resume_exists:
-        return redirect('my_resume_form')
-
-    resume_form = ResumeForm()
-    if request.method == 'POST':
-        resume_form = ResumeForm(request.POST, request.FILES)
-
-        if resume_form.is_valid():
-            resume_form_update = resume_form.save(commit=False)
-            resume_form_update.user_id = request.user.id
-            resume_form.save()
-            messages.success(request, 'Резюме успешно создано')
+    def get(self, request, *args, **kwargs):
+        if Resume.objects.filter(user_id=request.user.id):
             return redirect('my_resume_form')
-        else:
-            messages.error(request, 'Проверьте правильность заполнения формы')
-
-    return render(request, 'vacancies/resume/resume-edit.html', {'form': resume_form})
+        return render(request, 'vacancies/resume/resume-create.html')
 
 
-def my_resume_view(request):
-    """Моё резюме заполненная форма"""
-    try:
-        resume = Resume.objects.get(user_id=request.user.id)
-    except Resume.DoesNotExist:
-        # если в обход меню на myresume/
-        if request.user.is_authenticated:
-            return redirect('my_resume_letsstart')
-        else:
-            return redirect('login')
+class MyResumeCreateView(LoginRequiredMixin, CreateView):
+    """Пустая форма резюме"""
+    template_name = 'vacancies/resume/resume-edit.html'
+    model = Resume
+    form_class = ResumeForm
 
-    resume_form = ResumeForm(instance=resume)
+    def get_success_url(self, **kwargs):
+        return reverse_lazy('my_resume_form')
 
-    if request.method == 'POST':
-        resume_form = ResumeForm(request.POST)
+    def form_valid(self, form):
+        form_add = form.save(commit=False)
+        form_add.user_id = self.request.user.id
+        form.save()
 
-        if resume_form.is_valid():
-            resume_data = resume_form.cleaned_data
-            Resume.objects.filter(user_id=request.user.id).update(**resume_data)
-            messages.success(request, 'Резюме успешно обновлено')
-            return redirect('my_resume_form')
-        else:
-            messages.error(request, 'Проверьте правильность заполнения формы')
+        messages.success(self.request, 'Резюме успешно создано')
+        return super().form_valid(form)
 
-    return render(request, 'vacancies/resume/resume-edit.html', {'form': resume_form})
+    def form_invalid(self, form):
+        messages.error(self.request, 'Проверьте правильность заполнения формы')
+        return super().form_invalid(form)
 
 
-@login_required
-def my_resume_delete(request):
-    """Удаление резюме"""
-    try:
-        Resume.objects.get(user_id=request.user.id).delete()
-        messages.success(request, 'Резюме успешно удалено')
-    except Resume.DoesNotExist:
-        messages.error(request,
-                       'Не получилось удалить ваше резюме, что-то пошло не так. Просьба сообщить администратору.')
+class MyResumeView(LoginRequiredMixin, UpdateView):
+    """Заполненная форма резюме"""
+    template_name = 'vacancies/resume/resume-edit.html'
+    model = Resume
+    form_class = ResumeForm
 
-    return redirect('my_resume_letsstart')
+    def get_success_url(self):
+        return reverse_lazy('my_vacancy_form', kwargs={'vacancy_id': self.kwargs['vacancy_id']})
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Resume, user_id=self.request.user.id)
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, 'Информация о резюме успешно обновлена')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Не удалось обновить резюме. Проверьте правильность заполнения формы')
+        return super().form_invalid(form)
+
+
+class MyResumeDeleteView(LoginRequiredMixin, DeleteView):
+    model = Resume
+    success_url = reverse_lazy("my_resume_letsstart")
+    pk_url_kwarg = 'user_id'
+
+    def get(self, *args, **kwargs):
+        return self.post(*args, **kwargs)
+
+    def get_object(self, queryset=None):
+        resume = get_object_or_404(Resume, user_id=self.kwargs['user_id'])
+        return resume
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Резюме удалено')
+        return super(MyResumeDeleteView, self).delete(request, *args, **kwargs)
 
 
 def custom_handler404(request, exception):

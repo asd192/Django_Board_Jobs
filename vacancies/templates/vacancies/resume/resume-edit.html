@@ -17,7 +17,8 @@
             </div>
 
             {% if form.name.value %}
-            <p class="text-center"><a href="{% url 'my_resume_delete' %}" class="text-secondary">Удалить моё резюме</a></p>
+                <p class="text-center"><a href="{% url 'my_resume_delete' user.id %}" class="text-secondary">Удалить моё
+                    резюме</a></p>
             {% endif %}
 
         </section>

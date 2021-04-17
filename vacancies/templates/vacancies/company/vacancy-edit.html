@@ -54,8 +54,8 @@
                         <!-- END Tab -->
                     </div>
 
-                    {% if pk %}
-                        <p class="text-center"><a href="{% url 'my_vacancy_delete' pk %}" class="text-secondary">Удалить
+                    {% if vacancy_exists %}
+                        <p class="text-center"><a href="{% url 'my_vacancy_delete' vacancy_exists %}" class="text-secondary">Удалить
                             эту вакансию</a></p>
                     {% endif %}
 
