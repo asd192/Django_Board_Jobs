@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.contrib.auth.views import LogoutView
 from django.urls import include, path
 
-from vacancies.views import CompanyCardView, MainView, UserProfile, VacanciesView, vacancy_view
+from vacancies.views import CompanyCardView, MainView, UserProfile, VacanciesView, VacancyView
 from vacancies.views import custom_handler404, custom_handler500
 from vacancies.views import Login, Registration
 from vacancies.views import my_company_delete_view, my_company_empty_view, my_company_view, MyCompanyLetsstarView
@@ -37,10 +37,10 @@ urlpatterns = [
     path('vacancies', VacanciesView.as_view(), name='vacancies'),  # все вакансии
     path('resumes', ResumesView.as_view(), name='resumes'),  # все резюме
     path('resumes_access', ResumesAccessView.as_view(), name='resumes_access'),  # все резюме
-    path('vacancies/<int:vacancy_id>', vacancy_view, name='vacancy'),  # одна вакансия
+    path('vacancies/<int:vacancy_id>', VacancyView.as_view(), name='vacancy'),  # одна вакансия
     path('vacancies/cat/<str:specialty>', VacanciesSpecialtyView.as_view(), name='vacancies_specialty'),
-    path('companies/<int:company_id>', CompanyCardView.as_view(), name='company'),  # компания
     path('vacancies/<int:vacancy_id>/send/', ResumeSendingView.as_view(), name='resume_send'),  # отправка заявки
+    path('companies/<int:company_id>', CompanyCardView.as_view(), name='company'),  # компания
     path('search', SearchView.as_view(), name='search'),
     path('profile/<int:pk>', UserProfile.as_view(), name='user_profile'),
 

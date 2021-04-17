@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.db.models import Count
@@ -12,7 +13,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView, UpdateView, View
 from django.views.generic.list import ListView
 
-from conf.settings import MEDIA_COMPANY_IMAGE_DIR, MEDIA_USER_PHOTO_IMAGE_DIR
+from conf.settings import MEDIA_COMPANY_IMAGE_DIR
 from vacancies.forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
 from vacancies.forms import MyLoginForm, MyRegistrationForm, UserProfileForm
 from vacancies.models import Application, Company, Resume, Specialty, Vacancy
@@ -45,7 +46,7 @@ class Login(LoginView):
         return super(Login, self).form_invalid(form)
 
 
-class UserProfile(UpdateView):
+class UserProfile(LoginRequiredMixin, UpdateView):
     """Профиль пользователя"""
     template_name = 'vacancies/profile.html'
     model = User
@@ -161,62 +162,42 @@ class CompanyCardView(VacanciesView):
         return context
 
 
-def vacancy_view(request, vacancy_id: int):
+class VacancyView(CreateView):
     """Страница вакансии"""
-    try:
-        vacancy = Vacancy.objects.select_related('company').get(id=vacancy_id)
-    except (Vacancy.DoesNotExist, Company.DoesNotExist):
-        raise Http404
+    template_name = 'vacancies/vacancy.html'
+    model = Vacancy
+    form_class = ApplicationForm
 
-    application_sent = False
-    user_in_application = Application.objects.filter(vacancy_id=vacancy_id).filter(user_id=request.user.id)
+    def get_success_url(self, **kwargs):
+        return reverse_lazy('resume_send', kwargs={'vacancy_id': self.kwargs['vacancy_id']})
 
-    if user_in_application:
-        # если уже отзывались на эту вакансию
-        application_sent = True
+    def get_context_data(self, **kwargs):
+        context = super(VacancyView, self).get_context_data(**kwargs)
 
-        application_form = ApplicationForm(instance=user_in_application.first())
-        if request.method == 'POST':
-            application_form = ApplicationForm(request.POST, request.FILES)
-            if application_form.is_valid():
-                vacancy_data = application_form.cleaned_data
-                written_photo = vacancy_data['written_photo']
+        user_in_application = Application.objects.filter(
+            vacancy_id=self.kwargs['vacancy_id'],
+            user_id=self.request.user.id,
+        )
+        context['application_sent'] = user_in_application
+        context['vacancy'] = self.model.objects.select_related('company').get(id=self.kwargs['vacancy_id'])
 
-                # если нет фото или checkbox(очистить) в True
-                if written_photo is None or written_photo is False:
-                    vacancy_data['written_photo'] = ''
-                else:
-                    vacancy_data['written_photo'] = f"{MEDIA_USER_PHOTO_IMAGE_DIR}/{vacancy_data['written_photo']}"
-                user_in_application.update(**vacancy_data)
+        if user_in_application:
+            messages.info(self.request, 'Вы уже отзывались на эту вакансию')
 
-                messages.success(request, 'Отклик обновлен')
-                return redirect('resume_send', vacancy_id=vacancy.id)
-            else:
-                messages.error(request, 'Проверьте правильность заполнения формы')
+        return context
 
-    else:
-        # пустая форма отклика
-        application_form = ApplicationForm()
-        if request.method == 'POST':
-            application_form = ApplicationForm(request.POST, request.FILES)
+    def form_valid(self, form):
+        form_add = form.save(commit=False)
+        form_add.vacancy_id = self.kwargs['vacancy_id']
+        form_add.user_id = self.request.user.id
+        form.save()
 
-            if application_form.is_valid():
-                vacancy_send_form_data = application_form.cleaned_data
-                vacancy_send_form_data['user_id'] = request.user.id
-                vacancy_send_form_data['vacancy_id'] = vacancy.id
-                Application(**vacancy_send_form_data).save()
-                messages.success(request, 'Отклик успешно отправлен')
-                return redirect('resume_send', vacancy_id=vacancy.id)
-            else:
-                messages.error(request, 'Проверьте правильность заполнения формы')
+        messages.success(self.request, 'Отклик успешно отправлен')
+        return super().form_valid(form)
 
-    context = {
-        'form': application_form,
-        'vacancy': vacancy,
-        'application_sent': application_sent,
-    }
-
-    return render(request, 'vacancies/vacancy.html', context=context)
+    def form_invalid(self, form):
+        messages.error(self.request, 'Не удалось отправить отклик. Проверьте правильность запонения формы')
+        return super().form_invalid(form)
 
 
 class ResumeSendingView(TemplateView):
@@ -404,7 +385,7 @@ def my_resume_empty_view(request):
         return redirect('login')
 
     # если резюме уже создано
-    resume_exists = Resume.objects.filter(user_id=request.user.id).values()
+    resume_exists = Resume.objects.filter(user_id=request.user.id)
     if resume_exists:
         return redirect('my_resume_form')
 

@@ -18,25 +18,18 @@
 
                     {% include 'vacancies/messages.html' %}
 
-                    {% if application_sent %}
-
-                        <p class="alert alert-success" role="alert">
-                            Вы уже отзывались на эту вакансию. Хотите
-                            <a href="#form_application" class="text-success">обновить</a>?
-                        </p>
-
-                    {% endif %}
-
                     <div class="vacancy_logo_company">
                         <a href="{% url 'company' vacancy.company_id %}"><img
                                 src="{{ vacancy.company.logo.url }}"
                                 width="130" height="80"
                                 alt="Логотип компании {{ vacancy.company.name|title }}"></a>
                     </div>
+
                     <div class="d-flex align-items-baseline align-content-baseline">
                         <h1 class="h2 mt-4 font-weight-bold">{{ vacancy.title }}</h1>
                         <p class="salary m-0 pl-3 font-italic">{{ vacancy.salary_min }} – {{ vacancy.salary_max }} Р</p>
                     </div>
+
                     <p class="mt-2">
                     <ul class="ul_skills">{{ vacancy.skills|list_li|safe|escape }}</ul>
                     </p>
@@ -53,19 +46,22 @@
 
                     {% if request.user.is_authenticated %}
 
-                        <div id="form_application" class="card-body mx-3">
-                            <p class="h5 mt-3 font-weight-normal">Отозваться на вакансию</p>
+                        {% if not application_sent %}
+                            <div id="form_application" class="card-body mx-3">
+                                <p class="h5 mt-3 font-weight-normal">Отозваться на вакансию</p>
 
-                            {% load crispy_forms_tags %}
-                            {% crispy form "bootstrap4" %}
+                                {% load crispy_forms_tags %}
+                                {% crispy form "bootstrap4" %}
 
-                        </div>
+                            </div>
+                        {% endif %}
 
                     {% else %}
 
                         <p class="mt-3 font-weight-normal text-center">Чтобы отозваться на вакансию необходимо <a
                                 href="{% url 'login' %}" class="text-info">Войти</a></p>
                     {% endif %}
+
 
                 </section>
             </div>
