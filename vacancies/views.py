@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
@@ -13,7 +12,6 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, TemplateView, UpdateView, View
 from django.views.generic.list import ListView
 
-import vacancies.models
 from vacancies.forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
 from vacancies.forms import MyLoginForm, MyRegistrationForm, UserProfileForm
 from vacancies.models import Application, Company, Resume, Specialty, Vacancy
@@ -321,7 +319,6 @@ class MyVacancyView(LoginRequiredMixin, UpdateView):
     def get_object(self, queryset=None):
         vacancy = get_object_or_404(Vacancy, id=self.kwargs['vacancy_id'])
         company_user = get_object_or_404(Company, owner_id=self.request.user.id)
-        print(vacancy.company_id, company_user.id)
         # проверка, что компания принадлежит юзеру
         if vacancy.company_id != company_user.id:
             raise Http404

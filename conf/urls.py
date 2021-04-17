@@ -24,8 +24,8 @@ from vacancies.views import CompanyCardView, MainView, UserProfile, VacanciesVie
 from vacancies.views import custom_handler404, custom_handler500
 from vacancies.views import Login, Registration
 from vacancies.views import MyCompanyCreateView, MyCompanyDeleteView, MyCompanyLetsstarView, MyCompanyView
-from vacancies.views import MyResumeDeleteView, MyResumeLetsstartView, MyResumeCreateView, MyResumeView
-from vacancies.views import MyVacanciesView, MyVacancyDeleteView, MyVacancyCreateView, MyVacancyView
+from vacancies.views import MyResumeCreateView, MyResumeDeleteView, MyResumeLetsstartView, MyResumeView
+from vacancies.views import MyVacanciesView, MyVacancyCreateView, MyVacancyDeleteView, MyVacancyView
 from vacancies.views import ResumesAccessView, ResumeSendingView, ResumesView, SearchView, VacanciesSpecialtyView
 
 handler404 = custom_handler404
