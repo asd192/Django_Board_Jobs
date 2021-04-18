@@ -2,7 +2,7 @@ from captcha.fields import CaptchaField
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Column, HTML, Layout, Row, Submit
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 
 from vacancies.models import Application, Company, Resume, Vacancy

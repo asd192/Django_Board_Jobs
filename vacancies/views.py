@@ -326,6 +326,7 @@ class MyVacancyView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(MyVacancyView, self).get_context_data(**kwargs)
+        context['applications'] = Application.objects.filter(vacancy_id=self.kwargs['vacancy_id'])
         context['vacancy_exists'] = self.kwargs['vacancy_id']
         return context
 
