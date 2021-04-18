@@ -33,7 +33,7 @@ class Company(models.Model):
     name = models.CharField("название", max_length=100)
     location = models.CharField("город", max_length=25)
     description = models.TextField("информация о компании", max_length=5000)
-    employee_count = models.CharField("количество сотрудников", max_length=10, choices=EmployeeCount.choices)
+    employee_count = models.IntegerField("количество сотрудников", choices=EmployeeCount.choices)
     logo = models.ImageField("логотип", upload_to=MEDIA_COMPANY_IMAGE_DIR)
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="owner_user", verbose_name="owner_id")
 
@@ -84,11 +84,11 @@ class Application(models.Model):
 
 class Resume(models.Model):
     class Grade(models.IntegerChoices):
-        intern = 1, ('Стажер')
-        junior = 2, ('Джуниор')
-        middle = 3, ('Миддл')
-        senior = 4, ('Синьор')
-        lead = 5, ('Лид')
+        intern = 1, 'Стажер'
+        junior = 2, 'Джуниор'
+        middle = 3, 'Миддл'
+        senior = 4, 'Синьор'
+        lead = 5, 'Лид'
 
     class Status(models.IntegerChoices):
         not_search = 1, ('Не ищу работу')
@@ -98,10 +98,10 @@ class Resume(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="resumes")
     name = models.CharField("имя", max_length=15)
     surname = models.CharField("фамилия", max_length=30)
-    status = models.CharField("готовность к работе", max_length=10, choices=Status.choices)
+    status = models.IntegerField("готовность к работе", choices=Status.choices)
     specialty = models.ForeignKey(Specialty, on_delete=models.CASCADE, max_length=30, verbose_name="специализация")
     salary = models.IntegerField("ожидаемое вознаграждение")
-    grade = models.CharField("квалификация", max_length=10, choices=Grade.choices)
+    grade = models.IntegerField("квалификация", choices=Grade.choices)
     education = models.TextField("образование", max_length=1000)
     experience = models.TextField("опыт работы", max_length=1000)
     portfolio = models.URLField("ссылка на портфолио", max_length=100)

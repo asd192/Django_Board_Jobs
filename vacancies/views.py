@@ -404,7 +404,7 @@ class MyResumeView(LoginRequiredMixin, UpdateView):
     form_class = ResumeForm
 
     def get_success_url(self):
-        return reverse_lazy('my_vacancy_form', kwargs={'vacancy_id': self.kwargs['vacancy_id']})
+        return reverse_lazy('my_resume_form')
 
     def get_object(self, queryset=None):
         return get_object_or_404(Resume, user_id=self.request.user.id)

@@ -9,10 +9,6 @@ from vacancies.models import Application, Company, Resume, Vacancy
 
 
 class MyRegistrationForm(UserCreationForm):
-    username = UsernameField(label='Логин', min_length=3, max_length=15)
-    first_name = forms.CharField(label='Имя', min_length=2, max_length=20)
-    last_name = forms.CharField(label='Фамилия', min_length=3, max_length=30)
-    email = forms.EmailField(label='Email', min_length=6, max_length=50)
     captcha = CaptchaField(label='Капча')
 
     def __init__(self, *args, **kwargs):
