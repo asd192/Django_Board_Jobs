@@ -21,7 +21,7 @@
                 </div>
             </div>
             <p class="text-center pt-1 font-italic">
-                Компания, {{ company.location }}, {{ vacancies|length|ru_pluralize:'вакансия, вакансии, вакансий' }}</p>
+                Компания в городе {{ company.location|title }}, {{ company.get_employee_count_display }} человек, {{ vacancies|length|ru_pluralize:'вакансия, вакансии, вакансий' }}</p>
             <p class="cmpn_ttl text-center pt-1">{{ company.description }}</p>
 
             <div class="row mt-5">

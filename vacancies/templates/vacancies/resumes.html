@@ -24,8 +24,8 @@
                                     <div class="col-12 col-md-8 col-lg-9">
                                         <h2 class="h2-name h2 pb-2">{{ resume.surname }} {{ resume.name }}</h2>
                                         <ul class="ul_skills">
-                                        {{ resume.grade_verbose|list_li|safe|escape }}
-                                        {{ resume.status_verbose|list_li|safe|escape }}
+                                        {{ resume.get_grade_display|list_li|safe|escape }}
+                                        {{ resume.get_status_display|list_li|safe|escape }}
                                         {{ resume.salary|list_li|safe|escape }}</ul>
                                         <p><strong>Опыт работы:</strong> <em>{{ resume.experience|linebreaks }}</em></p>
                                         <p><strong>Образование:</strong> <em>{{ resume.education|truncatechars:150|striptags }}</em>

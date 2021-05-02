@@ -26,9 +26,9 @@ class Company(models.Model):
     class EmployeeCount(models.IntegerChoices):
         c_0000_0015 = 1, ('0-15')
         c_0015_0100 = 2, ('15-100')
-        c_0100_0500 = 3, ('0-15')
-        c_0500_1000 = 4, ('15-100')
-        c_1000_9999 = 5, ('0-15')
+        c_0100_0500 = 3, ('100-500')
+        c_0500_1000 = 4, ('500-1000')
+        c_1000_9999 = 5, ('> 1000')
 
     name = models.CharField("название", max_length=100)
     location = models.CharField("город", max_length=25)
